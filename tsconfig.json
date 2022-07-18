@@ -2,12 +2,8 @@
   "compilerOptions": {
     "target": "es2016",
     "module": "commonjs",
-    "allowJs": true,
-    "outDir": "lib",
     "sourceMap": true,
-    "resolveJsonModule": true,
-    "importHelpers": true,
-    "experimentalDecorators": true
+    "outDir": "lib",
   },
   "include": [
     "./src/**/*.ts"
