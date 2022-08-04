@@ -1,7 +1,7 @@
 {
-  "name": "solfren-web-sdk",
+  "name": "@solfrenxyz/solfren-web-sdk",
   "version": "0.0.0",
-  "description": "",
+  "description": "SolFren web sdk",
   "main": "index.js",
   "scripts": {
     "lint": "eslint . --ext .js,.ts,.cjs",
@@ -13,8 +13,8 @@
     "type": "git",
     "url": "git+https://github.com/solfren-team/solfren-web-sdk.git"
   },
-  "author": "",
   "license": "ISC",
+  "author": "SolFren",
   "bugs": {
     "url": "https://github.com/solfren-team/solfren-web-sdk/issues"
   },
