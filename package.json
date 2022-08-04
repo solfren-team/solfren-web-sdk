@@ -13,8 +13,8 @@
     "type": "git",
     "url": "git+https://github.com/solfren-team/solfren-web-sdk.git"
   },
-  "license": "ISC",
   "author": "SolFren",
+  "license": "GPL",
   "bugs": {
     "url": "https://github.com/solfren-team/solfren-web-sdk/issues"
   },
