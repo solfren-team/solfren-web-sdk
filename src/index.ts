@@ -1,0 +1,1 @@
+export { NFTFeed } from './feed';
