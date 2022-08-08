@@ -1,8 +1,15 @@
 {
   "name": "@solfrenxyz/solfren-web-sdk",
-  "version": "0.0.0",
+  "version": "0.0.5",
   "description": "SolFren web sdk",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "/lib",
+    "/src"
+  ],
   "scripts": {
     "lint": "eslint . --ext .js,.ts,.cjs",
     "test": "echo \"Error: no test specified\" && exit 1",
