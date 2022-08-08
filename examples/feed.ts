@@ -5,8 +5,7 @@ import { Client } from '@elastic/elasticsearch'
     const esClient = new Client({
         node: 'http://joe.onedoggo.com:9200',
         auth: {
-            // apiKey: "LWs2aWU0SUJ1c2ZkYW5GWnZvWHI6RkU0ajFfR3lUdUtqbmp1TW9vTHVoUQ=="
-            apiKey: "QlU2c2U0SUJ1c2ZkYW5GWk9MQno6ckoxbWNxYmFUN0dZbi1UbDR5ZnFpUQ==" //root
+            apiKey: "X0ZVQ2ZZSUJ1c2ZkYW5GWm1nR1I6Nm00YU1JamZUbGE1dlExekkyZzRWQQ=="
         }
     });
     const feed = new NFTFeed(esClient);
