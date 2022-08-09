@@ -1,5 +1,5 @@
 import { Client } from '@elastic/elasticsearch';
-import SolFrenAPI, { SolNFTTransaction, SolNFTTransSale } from '../protocols/solfren-nft';
+import SolFrenAPI, { SolNFTTransaction, SolNFTTransSale } from '../../protocols/solfren-nft';
 import { Action, FeedItem, FeedType } from './types';
 
 export default class NFTFeed {
@@ -11,7 +11,7 @@ export default class NFTFeed {
         this.solFrenAPI = new SolFrenAPI(client);
     }
 
-    public async getFeedsByFollowing(from: number = 0, size: number = 20, filterByFollowings: string[], withWalletInfo: boolean = true): Promise<FeedItem[]> {
+    public async listByFollowing(from: number = 0, size: number = 20, filterByFollowings: string[], withWalletInfo: boolean = true): Promise<FeedItem[]> {
         let feedItems: FeedItem[] = [];
         // get NFT Trading feeds
         const nftTrans = await this.solFrenAPI.getNFTTransactions(from, size, filterByFollowings)
@@ -23,7 +23,7 @@ export default class NFTFeed {
         return feedItems;
     }
 
-    public async getFeedsByDiscover(from: number = 0, size: number = 20, withWalletInfo: boolean = true): Promise<FeedItem[]> {
+    public async listByDiscover(from: number = 0, size: number = 20, withWalletInfo: boolean = true): Promise<FeedItem[]> {
         //TODO: recommendation for feed discover
         let feedItems: FeedItem[] = [];
         // get NFT Trading feeds

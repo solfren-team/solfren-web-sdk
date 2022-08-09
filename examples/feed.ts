@@ -1,4 +1,4 @@
-import { FeedItem, NFTFeed } from '../src/feed';
+import { FeedItem, NFTFeed } from '../src/modules/feed';
 import { Client } from '@elastic/elasticsearch'
 
 (async () => {
@@ -9,10 +9,10 @@ import { Client } from '@elastic/elasticsearch'
         }
     });
     const feed = new NFTFeed(esClient);
-    const discoverFeeds = await feed.getFeedsByDiscover();
+    const discoverFeeds = await feed.listByDiscover();
     console.log('discoverFeeds', discoverFeeds);
 
-    const followingFeeds = await feed.getFeedsByFollowing(0, 20, [
+    const followingFeeds = await feed.listByFollowing(0, 20, [
         "GghH4bzBCL5LPT7pQb61K38U692unuJcdMyagJsbrXBp",
         "HEy7vnGUAhH5wdd8EDzEupfM3wTDsmPRAxNyrC31k4x",
         "CydboaUkUHWgneFXdECFUsZEwNEPTuZEyvmcv6VTsGHY"
