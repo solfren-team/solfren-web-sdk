@@ -41,7 +41,11 @@ export interface CollectionInfo {
 }
 
 /**
- * NFT Transaction 
+<<<<<<< HEAD
+ * NFT Transaction
+=======
+ * NFT Transaction
+>>>>>>> e2c2a00 (feat(protocols): solfren api)
  */
 
 export interface SolNFTTransaction {
