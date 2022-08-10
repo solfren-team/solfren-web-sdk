@@ -1,1 +1,1 @@
-export { NFTFeed } from './feed';
+export * from './modules/feed';

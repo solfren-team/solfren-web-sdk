@@ -1,4 +1,4 @@
-import { NFTInfo } from "../protocols/solfren-nft"; //TODO: decouple protocol type
+import { NFTInfo } from "../../protocols/solfren-nft"; //TODO: decouple protocol type
 import { WalletInfo } from "../wallet";
 
 export const enum FeedType {

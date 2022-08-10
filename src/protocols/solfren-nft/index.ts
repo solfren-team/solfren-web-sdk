@@ -5,10 +5,16 @@ import { SolNFTTransaction } from './types';
 export * from './types';
 
 export default class SolFrenAPI {
-    private client: Client; //TODO: don't access ES from SDK directly, use solfren-api instead.
+    private client: Client;
 
-    public constructor(client: Client) {
-        this.client = client;
+    public constructor(apiKey: String) {
+        //TODO: don't access ES from SDK directly, use solfren-api instead.
+        this.client = new Client({
+            node: 'http://es.solfren.xyz:9200',
+            auth: {
+                apiKey: `${apiKey}`
+            }
+        });
     }
     
     public async getNFTTransactions(from: number = 0, size: number = 20, filterByAddresses: string[], hasCollection?: boolean): Promise<SolNFTTransaction[]> {
