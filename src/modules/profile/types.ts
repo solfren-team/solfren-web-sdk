@@ -19,14 +19,6 @@ export interface Wallet {
   }
 }
 
-export interface Statistics {
-  volume30DaysSum?: number
-  hodlDaysSum?: number
-  collectionCount?: number
-  nftCount?: number
-  trade30DaysCount?: number
-}
-
 export interface Twitter {
   id: string
   name: string
@@ -41,4 +33,12 @@ export interface Twitter {
     tweetCount?: number
     listedCount?: number
   }
+}
+
+export interface Statistics {
+  volume30DaysSum?: number
+  hodlDaysSum?: number
+  collectionCount?: number
+  nftCount?: number
+  trade30DaysCount?: number
 }
