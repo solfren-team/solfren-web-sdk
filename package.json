@@ -1,8 +1,15 @@
 {
   "name": "@solfrenxyz/solfren-web-sdk",
-  "version": "0.0.0",
+  "version": "0.0.5",
   "description": "SolFren web sdk",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "/lib",
+    "/src"
+  ],
   "scripts": {
     "lint": "eslint . --ext .js,.ts,.cjs",
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -13,7 +20,7 @@
     "type": "git",
     "url": "git+https://github.com/solfren-team/solfren-web-sdk.git"
   },
-  "author": "SolFren",
+  "author": "SolFren <contact@solfren.xyz>",
   "license": "GPL",
   "bugs": {
     "url": "https://github.com/solfren-team/solfren-web-sdk/issues"
@@ -23,6 +30,8 @@
     "node": ">=16"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.1.0",
+    "@metaplex-foundation/js": "^0.14.0",
     "got": "^11.8.2",
     "ts-node": "^10.9.1",
     "typescript": "^4.7.4"
