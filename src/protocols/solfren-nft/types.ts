@@ -38,15 +38,13 @@ export interface CollectionInfo {
   categories?: string[];
   totalItems?: number;
   parentCollectionId?: string; // prepare for nested collections (metaplex v1.3)
+  marketplace?: MarketplaceInfo;
 }
 
-/**
-<<<<<<< HEAD
- * NFT Transaction
-=======
- * NFT Transaction
->>>>>>> e2c2a00 (feat(protocols): solfren api)
- */
+export interface MarketplaceInfo {
+  name: string;
+  id: string;
+}
 
 export interface SolNFTTransaction {
   signature: string;
