@@ -30,7 +30,7 @@
     "node": ">=16"
   },
   "dependencies": {
-    "@elastic/elasticsearch": "^8.1.0",
+    "@elastic/elasticsearch": "^8.2.1",
     "@metaplex-foundation/js": "^0.14.0",
     "got": "^11.8.2",
     "ts-node": "^10.9.1",
