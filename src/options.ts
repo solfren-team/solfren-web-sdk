@@ -1,5 +1,5 @@
 export class Options {
-    solFrenAPI?: {
-        apiKey: string
-    }
+  solFrenAPI?: {
+    apiKey: string
+  }
 }
