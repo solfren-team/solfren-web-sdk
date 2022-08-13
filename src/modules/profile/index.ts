@@ -34,6 +34,19 @@ export default class Profile {
       } as Twitter;
     }
 
+    const topProfile = await this.solFrenWallet.getTopVolume(walletAddress);
+    const topDiversity = await this.solFrenWallet.getTopDiversity(walletAddress);
+    const topTradingFreq = await this.solFrenWallet.getTopTradingFreq(walletAddress);
+
+    // Random Select Avatar NFT if no WalletInfo.selectedAvatarNFT
+    if (!wallet.selectedAvatarNFT && topDiversity && topDiversity.topHits.length > 0) {
+      const nftInfo = topDiversity.topHits[Math.floor(Math.random() * topDiversity.topHits.length)].nftInfo;
+      wallet.selectedAvatarNFT = {
+        name: nftInfo.name,
+        image_url: nftInfo.uriMetadata.image ?? '',
+      }
+    }
+
     return {
       wallet: {
         address: walletAddress,
@@ -50,6 +63,13 @@ export default class Profile {
           imageUrl: wallet.selectedAvatarNFT?.image_url,
         }
       },
+      statistics: {
+        volume30DaysSum: topProfile?.sum ?? 0,
+        hodlDaysSum: 0,
+        collectionCount: topDiversity?.collectionCount ?? 0,
+        nftCount: topDiversity?.nftCount ?? 0,
+        trade30DaysCount: topTradingFreq?.count ?? 0,
+      },
     } as ProfileItem;
-  }
+  };
 }
