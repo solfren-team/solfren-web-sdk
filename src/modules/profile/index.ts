@@ -7,7 +7,7 @@ export default class Profile {
 
   public constructor(options: Options) {
     if (options.solFrenAPI == undefined) {
-      throw new Error('NFTFeed: must provide SolFrenWallet.apiKey');
+      throw new Error('Profile: must provide SolFrenWallet.apiKey');
     }
     this.solFrenWallet = new SolFrenWallet(options.solFrenAPI.apiKey);
   }
