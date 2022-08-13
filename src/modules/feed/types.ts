@@ -1,5 +1,5 @@
 import { NFTInfo } from "../../protocols/solfren-nft"; //TODO: decouple protocol type
-import { WalletInfo } from "../wallet";
+import { Wallet } from "../profile/types";
 
 export const enum FeedType {
     Trade = "trade",
@@ -22,7 +22,7 @@ export interface FeedItem {
     timestamp: Date,
 
     nftInfo?: NFTInfo,
-    ownerWalletInfo?: WalletInfo,
+    ownerWalletInfo?: Wallet,
 
     // for Trade Item
     marketplace?: string;
