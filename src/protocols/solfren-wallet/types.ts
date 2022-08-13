@@ -1,3 +1,5 @@
+import { CollectionInfo, SolNFTTransSale } from "../solfren-nft/types"
+
 export interface WalletInfo {
   walletAddress: string,
   name?: string,
@@ -28,4 +30,33 @@ export interface TwitterInfo {
     tweet_count?: number,
     listed_count?: number
   }
+}
+
+export interface TopVolumeItem {
+  ownerAddress: string,
+  count: number,
+  sum: number,
+  avg: number,
+  max: number,
+  topHits: SolNFTTransSale[]
+}
+
+export interface TopDiversityItem {
+  ownerAddress: string,
+  nftCount: number,
+  collectionCount: number,
+  topHits: SolNFTTransSale[]
+}
+
+export interface TopTradingFreqItem {
+  ownerAddress: string,
+  count: number,
+  sellCount: number,
+  buyCount: number,
+  collections: {
+    collectionName: string,
+    collectionImage?: string,
+    count: number,
+    topHit: CollectionInfo,
+  }[],
 }

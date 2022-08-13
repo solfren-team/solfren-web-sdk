@@ -1,6 +1,6 @@
 import { Client } from '@elastic/elasticsearch';
-import { WalletInfo } from './types';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
+import { TopDiversityItem, TopTradingFreqItem, TopVolumeItem, WalletInfo } from './types';
 
 export default class SolFrenWallet {
   private client: Client;
@@ -37,20 +37,20 @@ export default class SolFrenWallet {
     }
   }
 
-  public async getWallets(walletAddresses: string[]): Promise<Map<string,WalletInfo>> {
+  public async getWallets(walletAddresses: string[]): Promise<Map<string, WalletInfo>> {
     const resp = await this.client.mget<WalletInfo>({
       index: this.INDEX_WALLET_INFOS,
       ids: walletAddresses,
     });
-    const walletInfos = new Map<string,WalletInfo>();
+    const walletInfos = new Map<string, WalletInfo>();
     for (const i in resp.docs) {
-        const walletInfo = (resp.docs[i] as estypes.GetGetResult<WalletInfo>)._source;
-        if(walletInfo){
+      const walletInfo = (resp.docs[i] as estypes.GetGetResult<WalletInfo>)._source;
+      if (walletInfo) {
 
-            //先不 sync bonfida, 太慢了，進 profile 時才 sync
-            // walletInfo = await this.syncBonfidaData(walletInfo);
-            walletInfos.set(resp.docs[i]._id, walletInfo)
-        }
+        //先不 sync bonfida, 太慢了，進 profile 時才 sync
+        // walletInfo = await this.syncBonfidaData(walletInfo);
+        walletInfos.set(resp.docs[i]._id, walletInfo)
+      }
     }
     return walletInfos;
   }
@@ -61,5 +61,182 @@ export default class SolFrenWallet {
       id: walletAddress,
       document: { 'walletAddress': walletAddress },
     });
+  }
+
+  public async getTopVolume(walletAddress: string): Promise<TopVolumeItem | undefined> {
+    const resp = await this.client.search({
+      index: 'sol-nft-trans',
+      size: 0,
+      q: `@timestamp:[now/d-30d TO now/d+1d] AND ownerAddress:${walletAddress}`,
+      aggs: {
+        owner: {
+          terms: {
+            field: 'ownerAddress',
+            size: 1,
+            order: {
+              'sumPrice': 'desc',
+            },
+          },
+          aggs: {
+            'top': {
+              top_hits: {
+                size: 5,
+                sort: [
+                  {
+                    'price': 'desc',
+                  },
+                ],
+              },
+            },
+            'sumPrice': {
+              sum: {
+                field: 'price',
+              },
+            },
+            'avgPrice': {
+              avg: {
+                field: 'price',
+              },
+            },
+            'maxPrice': {
+              max: {
+                field: 'price',
+              },
+            },
+            'minPrice': {
+              min: {
+                field: 'price',
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!resp.aggregations || resp.aggregations['owner']['buckets'].length === 0) {
+      return undefined;
+    }
+    const bucket = resp.aggregations['owner']['buckets'][0];
+
+    return {
+      ownerAddress: bucket.key,
+      count: bucket.doc_count,
+      sum: bucket.sumPrice.value,
+      avg: bucket.avgPrice.value,
+      max: bucket.maxPrice.value,
+      topHits: bucket.top.hits.hits.map((i: any) => i._source),
+    } as TopVolumeItem;
+  }
+
+  public async getTopDiversity(walletAddress: string): Promise<TopDiversityItem | undefined> {
+    const resp = await this.client.search({
+      index: 'sol-nft-trans',
+      size: 0,
+      q: `owner_address:${walletAddress}`,
+      aggs: {
+        owner: {
+          terms: {
+            field: 'ownerAddress',
+            size: 1,
+            order: {
+              'collectionCount': 'desc',
+            },
+          },
+          aggs: {
+            'top': {
+              top_hits: {
+                size: 5,
+              },
+            },
+            'collectionCount': {
+              cardinality: {
+                field: 'nftInfo.collectionInfo.collectionId',
+                precision_threshold: 100,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!resp.aggregations || resp.aggregations['owner']['buckets'].length === 0) {
+      return undefined;
+    }
+    const bucket = resp.aggregations['owner']['buckets'][0];
+
+    return {
+      ownerAddress: bucket.key,
+      nftCount: bucket.doc_count,
+      collectionCount: bucket.collectionCount.value,
+      topHits: bucket.top.hits.hits.map((i: any) => i._source),
+    } as TopDiversityItem;
+  }
+
+  public async getTopTradingFreq(walletAddress: string): Promise<TopTradingFreqItem | undefined> {
+    const resp = await this.client.search({
+      index: 'sol-nft-trans',
+      size: 0,
+      q: `@timestamp:[now/d-30d TO now/d+1d] AND ownerAddress:${walletAddress}`,
+      aggs: {
+        owner: {
+          terms: {
+            field: 'ownerAddress',
+            size: 1,
+            order: {
+              '_count': 'desc',
+            },
+          },
+          aggs: {
+            'buy': {
+              filter: {
+                term: {
+                  'action': 'buy',
+                },
+              },
+            },
+            'sell': {
+              filter: {
+                term: {
+                  'action': 'sell',
+                },
+              },
+            },
+            'collection': {
+              terms: {
+                field: 'nftInfo.collectionInfo.collectionId',
+                size: 5,
+              },
+              aggs: {
+                'top': {
+                  top_hits: {
+                    size: 1,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!resp.aggregations || resp.aggregations['owner']['buckets'].length === 0) {
+      return undefined;
+    }
+    const bucket = resp.aggregations['owner']['buckets'][0];
+
+    return {
+      ownerAddress: bucket.key,
+      count: bucket.doc_count,
+      sellCount: bucket.sell.doc_count,
+      buyCount: bucket.buy.doc_count,
+      collections: bucket.collection.buckets.map((col: any) => {
+        return {
+          collectionName: col.name,
+          collectionImage: col.image,
+          count: col.doc_count,
+          topHit: col.top.hits.hits[0]._source,
+        };
+      }),
+    } as TopTradingFreqItem;
   }
 }
