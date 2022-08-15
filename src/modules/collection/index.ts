@@ -71,10 +71,10 @@ export default class Collection {
   // refer to https://solanacookbook.com/references/nfts.html#how-to-get-the-owner-of-an-nft.
   private async getOwnerOfNFT(mintAddress: string): Promise<ItemOwnerResource | null> {
     try {
-      const largestAccounts = await this.connection.getTokenLargestAccounts(new PublicKey(mintAddress));
-      const largestAccountInfo = await this.connection.getParsedAccountInfo(largestAccounts.value[0].address);
+      const tokenLargestAccounts = await this.connection.getTokenLargestAccounts(new PublicKey(mintAddress));
+      const parsedAccountInfo = await this.connection.getParsedAccountInfo(tokenLargestAccounts.value[0].address);
       return {
-        id: (largestAccountInfo.value?.data as ParsedAccountData).parsed.info.owner,
+        id: (parsedAccountInfo.value?.data as ParsedAccountData).parsed.info.owner,
       };
     } catch (err) {
       // TODO: handle err
