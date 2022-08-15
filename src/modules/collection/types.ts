@@ -14,3 +14,23 @@ export interface CollectionResource {
   volumeAll?: number
   createdAt: Date;
 }
+
+export interface ItemResource {
+  // id is the NFT mint address.
+  id: string;
+  // name is the NFT name.
+  name: string;
+  // image is the image url of NFT.
+  image: string;
+  // owner is the owner of NFT.
+  owner: ItemOwnerResource | null;
+  // collected indicates if collected by present member.
+  collected?: boolean;
+}
+
+export interface ItemOwnerResource {
+  // id is the public address of owner.
+  id: string;
+  // avatar is the avatar of owner.
+  avatar?: string;
+}

@@ -1,18 +1,23 @@
 import SolFrenAPI from "../../protocols/solfren-nft";
 import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
-import { CollectionResource } from "./types";
+import { CollectionResource, ItemResource, ItemOwnerResource } from "./types";
 import { Options } from '../../options';
+import { Windex } from "@wonka-labs/wonka-js";
+import { CollectionItem } from "@wonka-labs/wonka-js/lib/windex";
+import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 
 export default class Collection {
   private solFrenAPI: SolFrenAPI;
   private marketplaces: Record<string, MarketplaceAPI> = marketplaces;
+  private connection: Connection;
 
   public constructor(options: Options) {
     if (options.solFrenAPI == undefined) {
       throw new Error('Collection: must provide SolFrenAPI.apiKey');
     }
     this.solFrenAPI = new SolFrenAPI(options.solFrenAPI.apiKey);
+    this.connection = new Connection(options.solanaRPC.endpoint);
   }
 
   public async get(id: string): Promise<CollectionResource | null> {
@@ -38,5 +43,42 @@ export default class Collection {
       }
     }
     return null;
+  }
+
+  public async listItems(id: string, size: number = 100): Promise<ItemResource[] | null> {
+    let nfts: CollectionItem[] | undefined;
+    try {
+      nfts = await Windex.fetchNFTsByCollectionID(new PublicKey(id), size, Windex.MAINNET_ENDPOINT);
+    } catch (err) {
+      return null;
+    }
+
+    const items = nfts.map(async (nft: CollectionItem): Promise<ItemResource> => {
+      return {
+        id: nft.address,
+        name: nft.name,
+        image: nft.image_url,
+        owner: await this.getOwnerOfNFT(nft.address),
+      };
+    });
+
+    // TODO: handle `collected`
+
+    return Promise.all(items);
+  }
+
+  // getOwnerOfNFT returns owner of nft,
+  // refer to https://solanacookbook.com/references/nfts.html#how-to-get-the-owner-of-an-nft.
+  private async getOwnerOfNFT(mintAddress: string): Promise<ItemOwnerResource | null> {
+    try {
+      const largestAccounts = await this.connection.getTokenLargestAccounts(new PublicKey(mintAddress));
+      const largestAccountInfo = await this.connection.getParsedAccountInfo(largestAccounts.value[0].address);
+      return {
+        id: (largestAccountInfo.value?.data as ParsedAccountData).parsed.info.owner,
+      };
+    } catch (err) {
+      // TODO: handle err
+      return null;
+    }
   }
 }
