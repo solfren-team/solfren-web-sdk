@@ -1,8 +1,10 @@
 import { Client } from '@elastic/elasticsearch';
 import { WalletInfo } from './types';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 
 export default class SolFrenWallet {
   private client: Client;
+  readonly INDEX_WALLET_INFOS = 'fe-wallets';
 
   public constructor(apiKey: String) {
     //TODO: don't access ES from SDK directly, use solfren-api instead.
@@ -17,7 +19,7 @@ export default class SolFrenWallet {
   public async getWallet(walletAddress: string): Promise<WalletInfo> {
     try {
       const resp = await this.client.get<WalletInfo>({
-        index: 'fe-wallets',
+        index: this.INDEX_WALLET_INFOS,
         id: walletAddress,
       });
 
@@ -33,6 +35,23 @@ export default class SolFrenWallet {
         twitterHandle: '',
       } as WalletInfo;
     }
+  }
+
+  public async getWallets(walletAddresses: string[]): Promise<Map<string,WalletInfo>> {
+    const resp = await this.client.mget<WalletInfo>({
+      index: this.INDEX_WALLET_INFOS,
+      ids: walletAddresses,
+    });
+    const walletInfos = new Map<string,WalletInfo>();
+    for( const i in resp.docs ){
+        var walletInfo = (resp.docs[i] as estypes.GetGetResult<WalletInfo>)._source!;
+        if(typeof walletInfo !== 'undefined'){
+            //先不 sync bonfida, 太慢了，進 profile 時才 sync
+            // walletInfo = await this.syncBonfidaData(walletInfo);
+            walletInfos.set(resp.docs[i]._id, walletInfo)
+        }
+    }
+    return walletInfos;
   }
 
   public async createWallet(walletAddress: string) {
