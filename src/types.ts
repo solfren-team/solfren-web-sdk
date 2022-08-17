@@ -1,4 +1,4 @@
-export interface Options {
+export interface Config {
   solFrenAPI: {
     apiKey: string
   }

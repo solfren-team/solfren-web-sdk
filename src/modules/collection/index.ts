@@ -1,8 +1,9 @@
+import assert from 'assert';
 import SolFrenAPI from "../../protocols/solfren-nft";
 import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
 import { CollectionResource, ItemResource, ItemOwnerResource } from "./types";
-import { Options } from '../../options';
+import { Config } from '../../types';
 import { Windex } from "@wonka-labs/wonka-js";
 import { CollectionItem } from "@wonka-labs/wonka-js/lib/windex";
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
@@ -12,12 +13,12 @@ export default class Collection {
   private marketplaces: Record<string, MarketplaceAPI> = marketplaces;
   private connection: Connection;
 
-  public constructor(options: Options) {
-    if (options.solFrenAPI == undefined) {
-      throw new Error('Collection: must provide SolFrenAPI.apiKey');
-    }
-    this.solFrenAPI = new SolFrenAPI(options.solFrenAPI.apiKey);
-    this.connection = new Connection(options.solanaRPC.endpoint);
+  public constructor(config: Config) {
+    assert(config.solFrenAPI.apiKey);
+    assert(config.solanaRPC.endpoint);
+
+    this.solFrenAPI = new SolFrenAPI(config.solFrenAPI.apiKey);
+    this.connection = new Connection(config.solanaRPC.endpoint);
   }
 
   public async get(id: string): Promise<CollectionResource | null> {
