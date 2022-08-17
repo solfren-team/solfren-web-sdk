@@ -7,7 +7,10 @@ import Profile from '../src/modules/profile';
     },
     solanaRPC: {
       endpoint: 'https://fragrant-long-dew.solana-mainnet.quiknode.pro/9329f6a9639c876d87e0bbe53c8fb39925555012'
-    }
+    },
+    wonkaAPI: {
+      endpoint: 'https://api.wonkalabs.xyz/v0.1/solana/mainnet/graphql',
+    },
   });
   const profileResp = await profile.get('the-wallet-address');
   console.log('profile', profileResp);

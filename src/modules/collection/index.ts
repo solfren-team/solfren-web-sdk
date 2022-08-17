@@ -4,21 +4,24 @@ import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
 import { CollectionResource, ItemResource, ItemOwnerResource } from "./types";
 import { Config } from '../../types';
-import { Windex } from "@wonka-labs/wonka-js";
-import { CollectionItem } from "@wonka-labs/wonka-js/lib/windex";
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
+import WonkaAPI from '../../protocols/wonka';
+import { NftEdge } from '../../protocols/wonka/types';
 
 export default class Collection {
   private solFrenAPI: SolFrenAPI;
   private marketplaces: Record<string, MarketplaceAPI> = marketplaces;
   private connection: Connection;
+  private wonkaAPI: WonkaAPI;
 
   public constructor(config: Config) {
     assert(config.solFrenAPI.apiKey);
     assert(config.solanaRPC.endpoint);
+    assert(config.wonkaAPI.endpoint);
 
     this.solFrenAPI = new SolFrenAPI(config.solFrenAPI.apiKey);
     this.connection = new Connection(config.solanaRPC.endpoint);
+    this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
   }
 
   public async get(id: string): Promise<CollectionResource | null> {
@@ -46,26 +49,29 @@ export default class Collection {
     return null;
   }
 
-  public async listItems(id: string, size: number = 100): Promise<ItemResource[] | null> {
-    let nfts: CollectionItem[] | undefined;
+  public async listItems(id: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
+    let nfts: NftEdge[] | null;
     try {
-      nfts = await Windex.fetchNFTsByCollectionID(new PublicKey(id), size, Windex.MAINNET_ENDPOINT);
+      nfts = await this.wonkaAPI.nftsByCollection(id, size, cursor);
     } catch (err) {
-      return null;
+      return [[], ""];
     }
 
-    const items = nfts.map(async (nft: CollectionItem): Promise<ItemResource> => {
-      return {
-        id: nft.address,
-        name: nft.name,
-        image: nft.image_url,
-        owner: await this.getOwnerOfNFT(nft.address),
-      };
-    });
+    const items: ItemResource[] = [];
+    let nextCursor: string = '';
+    for (const nft of nfts) {
+      items.push({
+        id: nft.node.id,
+        name: nft.node.name,
+        image: nft.node.image.orig,
+        owner: await this.getOwnerOfNFT(nft.node.owner.address),
+      });
+      nextCursor = nft.cursor;
+    }
 
     // TODO: handle `collected`
 
-    return Promise.all(items);
+    return [items, nextCursor];
   }
 
   // getOwnerOfNFT returns owner of nft,

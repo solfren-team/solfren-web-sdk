@@ -5,4 +5,7 @@ export interface Config {
   solanaRPC: {
     endpoint: string
   }
+  wonkaAPI: {
+    endpoint: string
+  }
 }
