@@ -44,8 +44,9 @@ export default class SolFrenWallet {
     });
     const walletInfos = new Map<string,WalletInfo>();
     for( const i in resp.docs ){
-        var walletInfo = (resp.docs[i] as estypes.GetGetResult<WalletInfo>)._source!;
-        if(typeof walletInfo !== 'undefined'){
+        const walletInfo = (resp.docs[i] as estypes.GetGetResult<WalletInfo>)._source;
+        if(walletInfo){
+
             //先不 sync bonfida, 太慢了，進 profile 時才 sync
             // walletInfo = await this.syncBonfidaData(walletInfo);
             walletInfos.set(resp.docs[i]._id, walletInfo)
