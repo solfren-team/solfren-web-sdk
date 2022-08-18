@@ -7,7 +7,7 @@ export default class Profile {
   private solFrenWallet: SolFrenWallet;
 
   public constructor(config: Config) {
-    assert(config.solFrenAPI.apiKey);
+    assert(config?.solFrenAPI?.apiKey);
 
     this.solFrenWallet = new SolFrenWallet(config.solFrenAPI.apiKey);
   }

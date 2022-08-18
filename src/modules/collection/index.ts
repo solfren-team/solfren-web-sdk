@@ -11,16 +11,16 @@ import { NftEdge } from '../../protocols/wonka/types';
 export default class Collection {
   private solFrenAPI: SolFrenAPI;
   private marketplaces: Record<string, MarketplaceAPI> = marketplaces;
-  private connection: Connection;
+  private solanaConn: Connection;
   private wonkaAPI: WonkaAPI;
 
   public constructor(config: Config) {
-    assert(config.solFrenAPI.apiKey);
-    assert(config.solanaRPC.endpoint);
-    assert(config.wonkaAPI.endpoint);
+    assert(config?.solFrenAPI?.apiKey);
+    assert(config?.solanaRPC?.endpoint);
+    assert(config?.wonkaAPI?.endpoint);
 
     this.solFrenAPI = new SolFrenAPI(config.solFrenAPI.apiKey);
-    this.connection = new Connection(config.solanaRPC.endpoint);
+    this.solanaConn = new Connection(config.solanaRPC.endpoint);
     this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
   }
 
@@ -49,7 +49,14 @@ export default class Collection {
     return null;
   }
 
-  public async listItems(id: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
+  /**
+   * listNfts returns nfts and nextCursor.
+   * @param id
+   * @param size
+   * @param cursor
+   * @returns [nfts, nextCursor]
+   */
+  public async listNfts(id: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
     let nfts: NftEdge[] | null;
     try {
       nfts = await this.wonkaAPI.nftsByCollection(id, size, cursor);
@@ -78,8 +85,8 @@ export default class Collection {
   // refer to https://solanacookbook.com/references/nfts.html#how-to-get-the-owner-of-an-nft.
   private async getOwnerOfNFT(mintAddress: string): Promise<ItemOwnerResource | null> {
     try {
-      const tokenLargestAccounts = await this.connection.getTokenLargestAccounts(new PublicKey(mintAddress));
-      const parsedAccountInfo = await this.connection.getParsedAccountInfo(tokenLargestAccounts.value[0].address);
+      const tokenLargestAccounts = await this.solanaConn.getTokenLargestAccounts(new PublicKey(mintAddress));
+      const parsedAccountInfo = await this.solanaConn.getParsedAccountInfo(tokenLargestAccounts.value[0].address);
       return {
         id: (parsedAccountInfo.value?.data as ParsedAccountData).parsed.info.owner,
       };

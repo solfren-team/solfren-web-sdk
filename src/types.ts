@@ -1,11 +1,11 @@
 export interface Config {
-  solFrenAPI: {
+  solFrenAPI?: {
     apiKey: string
   }
-  solanaRPC: {
+  solanaRPC?: {
     endpoint: string
   }
-  wonkaAPI: {
+  wonkaAPI?: {
     endpoint: string
   }
 }

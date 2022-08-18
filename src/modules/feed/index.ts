@@ -7,7 +7,7 @@ export class NFTFeed {
   private solFrenAPI: SolFrenAPI;
 
   public constructor(config: Config) {
-    assert(config.solFrenAPI.apiKey);
+    assert(config?.solFrenAPI?.apiKey);
 
     this.solFrenAPI = new SolFrenAPI(config.solFrenAPI.apiKey);
   }
