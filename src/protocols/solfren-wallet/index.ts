@@ -43,7 +43,7 @@ export default class SolFrenWallet {
       ids: walletAddresses,
     });
     const walletInfos = new Map<string,WalletInfo>();
-    for( const i in resp.docs ){
+    for (const i in resp.docs) {
         const walletInfo = (resp.docs[i] as estypes.GetGetResult<WalletInfo>)._source;
         if(walletInfo){
 
