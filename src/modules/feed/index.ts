@@ -1,23 +1,19 @@
-export * from './types';
-
-import { Client } from '@elastic/elasticsearch';
+import assert from 'assert';
 import SolFrenAPI, { SolNFTTransaction, SolNFTTransSale } from '../../protocols/solfren-nft';
 import SolFrenWallet from '../../protocols/solfren-wallet';
 import { Wallet } from '../profile/types'
 import { Action, FeedItem, FeedType } from './types';
-import { Options } from '../../options';
+import { Config } from '../../types';
 import { WalletInfo } from '../../protocols/solfren-wallet/types';
 
 export class NFTFeed {
     private solFrenAPI: SolFrenAPI;
     private solFrenWallet: SolFrenWallet;
 
-    public constructor(options: Options) {
-        if(options.solFrenAPI == undefined) {
-            throw new Error('NFTFeed: must provide SolFrenAPI.apiKey');
-        }
-        this.solFrenAPI = new SolFrenAPI(options.solFrenAPI.apiKey);
-        this.solFrenWallet = new SolFrenWallet(options.solFrenAPI.apiKey);
+    public constructor(config: Config) {
+        assert(config?.solFrenAPI?.apiKey);
+        this.solFrenAPI = new SolFrenAPI(config.solFrenAPI.apiKey);
+        this.solFrenWallet = new SolFrenWallet(config.solFrenAPI.apiKey);
     }
 
     public async listByFollowing(from: number = 0, size: number = 20, filterByFollowings: string[], withWalletInfo: boolean = true): Promise<FeedItem[]> {

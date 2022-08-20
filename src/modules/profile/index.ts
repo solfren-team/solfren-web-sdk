@@ -1,15 +1,15 @@
-import { Options } from '../../options';
+import assert from 'assert';
+import { Config } from '../../types';
 import SolFrenWallet from '../../protocols/solfren-wallet';
 import { ProfileItem, Twitter } from './types';
 
 export default class Profile {
   private solFrenWallet: SolFrenWallet;
 
-  public constructor(options: Options) {
-    if (options.solFrenAPI == undefined) {
-      throw new Error('Profile: must provide SolFrenWallet.apiKey');
-    }
-    this.solFrenWallet = new SolFrenWallet(options.solFrenAPI.apiKey);
+  public constructor(config: Config) {
+    assert(config?.solFrenAPI?.apiKey);
+
+    this.solFrenWallet = new SolFrenWallet(config.solFrenAPI.apiKey);
   }
 
   public async get(walletAddress: string): Promise<ProfileItem> {
