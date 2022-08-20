@@ -8,4 +8,7 @@ export interface Config {
   wonkaAPI?: {
     endpoint: string
   }
+  twitter?: {
+    apiKey: string
+  }
 }

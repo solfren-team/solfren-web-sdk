@@ -2,18 +2,30 @@ import assert from 'assert';
 import { Config } from '../../types';
 import SolFrenWallet from '../../protocols/solfren-wallet';
 import { ProfileItem, Twitter } from './types';
+import { WalletInfo } from '../../protocols/solfren-wallet/types';
+import TwitterAPI from '../../protocols/twitter';
+import WonkaAPI from '../../protocols/wonka';
 
 export default class Profile {
   private solFrenWallet: SolFrenWallet;
+  private wonkaAPI: WonkaAPI;
+  private twitterAPI: TwitterAPI;
 
   public constructor(config: Config) {
     assert(config?.solFrenAPI?.apiKey);
+    assert(config?.wonkaAPI?.endpoint);
+    assert(config?.twitter?.apiKey);
 
     this.solFrenWallet = new SolFrenWallet(config.solFrenAPI.apiKey);
+    this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
+    this.twitterAPI = new TwitterAPI(config.twitter.apiKey);
   }
 
   public async get(walletAddress: string): Promise<ProfileItem> {
-    const wallet = await this.solFrenWallet.getWallet(walletAddress);
+    let wallet = await this.solFrenWallet.getWallet(walletAddress);
+    if (!wallet.twitterHandle || !wallet.solanaDomain) {
+      wallet = await this.syncWithBonfida(wallet);
+    }
 
     let twitter: Twitter | undefined;
     if (wallet.twitterInfo) {
@@ -72,4 +84,30 @@ export default class Profile {
       },
     } as ProfileItem;
   };
+
+  private async syncWithBonfida(walletInfo: WalletInfo): Promise<WalletInfo> {
+    const resp = await this.wonkaAPI.fetchSolDomainMetadata(walletInfo.walletAddress);
+    if (!resp) {
+      return walletInfo;
+    }
+
+    walletInfo.twitterHandle = resp.twitter;
+    walletInfo.solanaDomain = resp.solName;
+    if (resp.twitter) {
+      walletInfo.twitterInfo = await this.twitterAPI.getTwitterInfo(resp.twitter);
+    }
+
+    try {
+      await this.solFrenWallet.upsertWallet({
+        walletAddress: walletInfo.walletAddress,
+        twitterHandle: walletInfo.twitterHandle,
+        twitterInfo: walletInfo.twitterInfo,
+        solanaDomain: walletInfo.solanaDomain,
+      } as WalletInfo);
+    } catch (err) {
+      console.error('failed to upsertWallet', err);
+    }
+
+    return walletInfo;
+  }
 }
