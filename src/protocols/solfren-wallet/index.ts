@@ -176,42 +176,53 @@ export default class SolFrenWallet {
     const resp = await this.client.search({
       index: 'sol-nft-trans',
       size: 0,
-      q: `@timestamp:[now/d-30d TO now/d+1d] AND ownerAddress:${walletAddress}`,
+      query: {
+        bool: {
+          must: [
+            {
+              query_string: {
+                fields: [
+                  'targetAddress',
+                  'ownerAddress',
+                ],
+                query: walletAddress,
+              },
+            },
+            {
+              range: {
+                'timestamp': {
+                  gte: 'now/d-30d',
+                  lt: 'now/d+1d',
+                },
+              },
+            },
+          ],
+        },
+      },
       aggs: {
-        owner: {
-          terms: {
-            field: 'ownerAddress',
-            size: 1,
-            order: {
-              '_count': 'desc',
+        'buy': {
+          filter: {
+            term: {
+              'targetAddress': walletAddress,
             },
           },
+        },
+        'sell': {
+          filter: {
+            term: {
+              'ownerAddress': walletAddress,
+            },
+          },
+        },
+        'collection': {
+          terms: {
+            field: 'nftInfo.collectionInfo.collectionId',
+            size: 5,
+          },
           aggs: {
-            'buy': {
-              filter: {
-                term: {
-                  'action': 'buy',
-                },
-              },
-            },
-            'sell': {
-              filter: {
-                term: {
-                  'action': 'sell',
-                },
-              },
-            },
-            'collection': {
-              terms: {
-                field: 'nftInfo.collectionInfo.collectionId',
-                size: 5,
-              },
-              aggs: {
-                'top': {
-                  top_hits: {
-                    size: 1,
-                  },
-                },
+            'top': {
+              top_hits: {
+                size: 1,
               },
             },
           },
@@ -219,17 +230,17 @@ export default class SolFrenWallet {
       },
     });
 
-    if (!resp.aggregations || resp.aggregations['owner']['buckets'].length === 0) {
+    if (!resp.aggregations) {
       return undefined;
     }
-    const bucket = resp.aggregations['owner']['buckets'][0];
+    const aggs: any = resp.aggregations;
 
     return {
-      ownerAddress: bucket.key,
-      count: bucket.doc_count,
-      sellCount: bucket.sell.doc_count,
-      buyCount: bucket.buy.doc_count,
-      collections: bucket.collection.buckets.map((col: any) => {
+      ownerAddress: walletAddress,
+      count: aggs.sell.doc_count + aggs.buy.doc_count,
+      sellCount: aggs.sell.doc_count,
+      buyCount: aggs.buy.doc_count,
+      collections: aggs.collection.buckets.map((col: any) => {
         return {
           collectionName: col.name,
           collectionImage: col.image,
