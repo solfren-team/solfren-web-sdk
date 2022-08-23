@@ -1,3 +1,6 @@
+import { PublicKey } from '@solana/web3.js';
+import { Windex } from '@wonka-labs/wonka-js';
+import { SolDomainMetadata } from '@wonka-labs/wonka-js/lib/windex';
 import { GraphQLClient, gql } from 'graphql-request'
 import { NftEdge } from './types';
 
@@ -80,5 +83,14 @@ export default class WonkaAPI {
     return this.client
       .request(query)
       .then((data) => data['nftsByCollection']['edges']);
+  }
+
+  public async fetchSolDomainMetadata(walletAddress: string): Promise<SolDomainMetadata | undefined> {
+    try {
+      return await Windex.fetchSolDomainMetadataByAddress(new PublicKey(walletAddress));
+    } catch (err) {
+      console.error('failed to fetchSolDomainMetadata', err);
+      return undefined;
+    }
   }
 }

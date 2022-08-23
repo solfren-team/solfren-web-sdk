@@ -63,6 +63,15 @@ export default class SolFrenWallet {
     });
   }
 
+  public async upsertWallet(walletInfo: WalletInfo) {
+    return await this.client.update({
+      index: 'fe-wallets',
+      id: walletInfo.walletAddress,
+      doc: walletInfo,
+      doc_as_upsert: true
+    })
+  }
+
   public async getTopVolume(walletAddress: string): Promise<TopVolumeItem | undefined> {
     const resp = await this.client.search({
       index: 'sol-nft-trans',
