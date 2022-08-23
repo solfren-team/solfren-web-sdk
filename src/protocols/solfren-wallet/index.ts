@@ -178,16 +178,24 @@ export default class SolFrenWallet {
       size: 0,
       query: {
         bool: {
-          must: [
+          minimum_should_match: 1,
+          should: [
             {
-              query_string: {
-                fields: [
-                  'targetAddress',
-                  'ownerAddress',
-                ],
-                query: walletAddress,
+              bool: {
+                filter: {
+                  term: { targetAddress: walletAddress },
+                },
               },
             },
+            {
+              bool: {
+                filter: {
+                  term: { ownerAddress: walletAddress },
+                },
+              },
+            },
+          ],
+          filter: [
             {
               range: {
                 'timestamp': {
