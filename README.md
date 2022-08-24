@@ -3,11 +3,15 @@
 SolFren, a social platform aim to make developer build Web3 Dapp easiler.
 `solfren-web-sdk` is a Javascript SDK provides many NFT social related modules which are composited by underlying web3 protocols.
 
-![SolFren Architecture](https://imgur.com/FVPEu2q)
+## Architecture
+
+![SolFren Architecture](https://imgur.com/FVPEu2q.png)
 
 Welcome to join our [Discord](https://discord.gg/D3rRx7zh) for more design and implementation discussion.
 
 ## Installation
+
+Checkout SolFren Web SDK latest [release](https://github.com/solfren-team/solfren-web-sdk/releases).
 
 ```
 npm install @solfrenxyz/solfren-web-sdk
