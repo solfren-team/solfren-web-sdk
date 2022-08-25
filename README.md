@@ -65,7 +65,7 @@ const profile = new Profile({
     endpoint: 'https://api.wonkalabs.xyz/v0.1/solana/mainnet/graphql',
   },
   twitter: {
-    apiKey: 'AAAAAAAAAAAAAAAAAAAAAFoLawEAAAAARjKss%2BTwiqey0ZrxFvsn%2BRsnX20%3Dbil5P0G83pjkXwMYhECcgkhiG4uqXlgWnS4fXO29RwefPLP66R',
+    apiKey: '{YOUR_TWITTER_API_KEY}',
   },
 });
 const profileResp = await profile.get('the-wallet-address');
