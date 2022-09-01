@@ -8,8 +8,6 @@ export interface WalletInfo {
   twitterHandle?: string,
   twitterInfo?: TwitterInfo,
   solanaDomain?: string,
-  followering?: Array<string>,
-  followers?: number,
   achievements?: Array<string>,
   selectedAvatarNFT?: {
     name: string,
