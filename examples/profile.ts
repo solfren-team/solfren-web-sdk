@@ -11,6 +11,9 @@ import Profile from '../src/modules/profile';
     twitter: {
       apiKey: '{YOUR_TWITTER_API_KEY}',
     },
+    cyberConnect: {
+      endpoint: 'https://api.cybertino.io/connect/',
+    },
   });
   const profileResp = await profile.get('the-wallet-address');
   console.log('profile', profileResp);
