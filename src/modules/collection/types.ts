@@ -26,6 +26,8 @@ export interface ItemResource {
   owner: ItemOwnerResource | null;
   // collected indicates if collected by present member.
   collected?: boolean;
+  // categories is inherited from collection.
+  categories?: string[];
 }
 
 export interface ItemOwnerResource {
@@ -33,4 +35,20 @@ export interface ItemOwnerResource {
   id: string;
   // avatar is the avatar of owner.
   avatar?: string;
+  // followed indicates if you followed this account or not.
+  followed?: boolean;
+}
+
+export interface ActivityResource {
+  id: string;
+  item: ItemResource;
+  price: number;
+  buyer: ItemOwnerResource;
+  seller: ItemOwnerResource;
+  timestamp: Date;
+}
+
+export interface ListActivitiesResponse {
+  activities: ActivityResource[];
+  cursor: string;
 }

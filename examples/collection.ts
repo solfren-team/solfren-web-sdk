@@ -25,4 +25,10 @@ import Collection from '../src/modules/collection';
     console.log(nfts);
     console.log(cursor);
   }
+
+  {
+    const resp = await collection.listActivities(id);
+    console.log(resp.activities);
+    console.log(resp.cursor);
+  }
 })()
