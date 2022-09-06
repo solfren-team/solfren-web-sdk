@@ -30,6 +30,7 @@
     "node": ">=16"
   },
   "dependencies": {
+    "@cyberlab/cyberconnect": "^4.5.0",
     "@elastic/elasticsearch": "^8.2.1",
     "@metaplex-foundation/js": "^0.14.0",
     "@metaplex-foundation/mpl-token-metadata": "^2.2.3",
