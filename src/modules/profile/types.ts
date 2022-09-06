@@ -10,13 +10,13 @@ export interface Wallet {
   twitterHandle?: string
   twitter?: Twitter
   solanaDomain?: string
-  followering?: Array<string>
-  followers?: number
   achievements?: Array<string>
   selectedAvatarNFT?: {
     name: string
     imageUrl: string
   }
+  followerCount: number;
+  followingCount: number;
 }
 
 export interface Twitter {

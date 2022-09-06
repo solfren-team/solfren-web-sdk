@@ -1,7 +1,8 @@
 import assert from 'assert';
 import { Config } from '../../types';
-import SolFrenWallet from '../../protocols/solfren-wallet';
 import { ProfileItem, Twitter } from './types';
+import CyberConnect from '../../protocols/cyberconnect';
+import SolFrenWallet from '../../protocols/solfren-wallet';
 import { WalletInfo } from '../../protocols/solfren-wallet/types';
 import TwitterAPI from '../../protocols/twitter';
 import WonkaAPI from '../../protocols/wonka';
@@ -10,15 +11,18 @@ export default class Profile {
   private solFrenWallet: SolFrenWallet;
   private wonkaAPI: WonkaAPI;
   private twitterAPI: TwitterAPI;
+  private cyberConnect: CyberConnect;
 
   public constructor(config: Config) {
     assert(config?.solFrenAPI?.apiKey);
     assert(config?.wonkaAPI?.endpoint);
     assert(config?.twitter?.apiKey);
+    assert(config?.cyberConnect?.endpoint);
 
     this.solFrenWallet = new SolFrenWallet(config.solFrenAPI.apiKey);
     this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
     this.twitterAPI = new TwitterAPI(config.twitter.apiKey);
+    this.cyberConnect = new CyberConnect(config.cyberConnect.endpoint)
   }
 
   public async get(walletAddress: string): Promise<ProfileItem> {
@@ -59,6 +63,8 @@ export default class Profile {
       }
     }
 
+    const followingInfo = await this.cyberConnect.getFollowingCount(walletAddress);
+
     return {
       wallet: {
         address: walletAddress,
@@ -67,13 +73,13 @@ export default class Profile {
         twitterHandle: wallet.twitterHandle,
         twitter,
         solanaDomain: wallet.solanaDomain,
-        followering: wallet.followering,
-        followers: wallet.followers,
         achievements: wallet.achievements,
         selectedAvatarNFT: {
           name: wallet.selectedAvatarNFT?.name,
           imageUrl: wallet.selectedAvatarNFT?.image_url,
-        }
+        },
+        followerCount: followingInfo?.followerCount,
+        followingCount: followingInfo?.followingCount,
       },
       statistics: {
         volume30DaysSum: topProfile?.sum ?? 0,
