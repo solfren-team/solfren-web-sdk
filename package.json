@@ -21,7 +21,7 @@
     "url": "git+https://github.com/solfren-team/solfren-web-sdk.git"
   },
   "author": "SolFren <contact@solfren.xyz>",
-  "license": "GPL",
+  "license": "GPL-3.0-only",
   "bugs": {
     "url": "https://github.com/solfren-team/solfren-web-sdk/issues"
   },
