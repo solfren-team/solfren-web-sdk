@@ -1,5 +1,5 @@
 import { NFTFeed } from './modules/feed';
-import Collection from './modules/collection';
+import Collection from './modules/nft';
 import { Config } from './types';
 
 export default class SolFrenSDK {

@@ -12,7 +12,7 @@ import { ConnectionType } from '@cyberlab/cyberconnect';
 import SolFrenNftTrans from '../../protocols/solfren-nft-trans';
 import { Transaction } from '../../protocols/solfren-nft-trans/types';
 
-export default class Collection {
+export default class NFT {
   private solFrenAPI: SolFrenAPI;
   private marketplaces: Record<string, MarketplaceAPI> = marketplaces;
   private solanaConn: Connection;
@@ -30,7 +30,7 @@ export default class Collection {
     this.solFrenNftTrans = new SolFrenNftTrans(config.solFrenAPI.apiKey);
   }
 
-  public async get(id: string): Promise<CollectionResource | null> {
+  public async getCollection(id: string): Promise<CollectionResource | null> {
     const collection = await this.solFrenAPI.getCollection(id);
     if (collection) {
       let stats: CollectionStats | null = null;
@@ -56,13 +56,13 @@ export default class Collection {
   }
 
   /**
-   * listNfts returns nfts and nextCursor.
+   * listByCollection returns NFTs and nextCursor.
    * @param id
    * @param size
    * @param cursor
    * @returns [nfts, nextCursor]
    */
-  public async listNfts(id: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
+  public async listByCollection(id: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
     let nfts: NftEdge[] | null;
     try {
       nfts = await this.wonkaAPI.nftsByCollection(id, size, cursor);
@@ -77,7 +77,7 @@ export default class Collection {
         id: nft.node.id,
         name: nft.node.name,
         image: nft.node.image.orig,
-        owner: await this.getOwnerOfNFT(nft.node.owner.address),
+        owner: await this.getOwner(nft.node.owner.address),
       });
       nextCursor = nft.cursor;
     }
@@ -111,9 +111,9 @@ export default class Collection {
     }
   }
 
-  // getOwnerOfNFT returns owner of nft,
+  // getOwner returns owner of nft,
   // refer to https://solanacookbook.com/references/nfts.html#how-to-get-the-owner-of-an-nft.
-  private async getOwnerOfNFT(mintAddress: string): Promise<ItemOwnerResource | null> {
+  private async getOwner(mintAddress: string): Promise<ItemOwnerResource | null> {
     try {
       const tokenLargestAccounts = await this.solanaConn.getTokenLargestAccounts(new PublicKey(mintAddress));
       const parsedAccountInfo = await this.solanaConn.getParsedAccountInfo(tokenLargestAccounts.value[0].address);
@@ -126,11 +126,11 @@ export default class Collection {
     }
   }
 
-  public async like(provider: any, collectionAddress: string) {
-    await getCyberConnectSDK(provider).connect(collectionAddress, undefined, ConnectionType.LIKE);
+  public async likeCollection(provider: any, collectionId: string) {
+    await getCyberConnectSDK(provider).connect(collectionId, undefined, ConnectionType.LIKE);
   }
 
-  public async unlike(provider: any, collectionAddress: string) {
-    await getCyberConnectSDK(provider).disconnect(collectionAddress);
+  public async unlikeCollection(provider: any, collectionId: string) {
+    await getCyberConnectSDK(provider).disconnect(collectionId);
   }
 }
