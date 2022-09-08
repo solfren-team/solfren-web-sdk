@@ -133,4 +133,12 @@ export default class NFT {
   public async unlikeCollection(provider: any, collectionId: string) {
     await getCyberConnectSDK(provider).disconnect(collectionId);
   }
+
+  public async likeNFT(provider: any, mintAddress: string) {
+    await getCyberConnectSDK(provider).connect(mintAddress, undefined, ConnectionType.LIKE);
+  }
+
+  public async unlikeNFT(provider: any, mintAddress: string) {
+    await getCyberConnectSDK(provider).disconnect(mintAddress);
+  }
 }
