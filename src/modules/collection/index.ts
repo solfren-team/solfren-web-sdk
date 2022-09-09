@@ -7,6 +7,8 @@ import { Config } from '../../types';
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 import WonkaAPI from '../../protocols/wonka';
 import { NftEdge } from '../../protocols/wonka/types';
+import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
+import { ConnectionType } from '@cyberlab/cyberconnect';
 
 export default class Collection {
   private solFrenAPI: SolFrenAPI;
@@ -94,5 +96,13 @@ export default class Collection {
       // TODO: handle err
       return null;
     }
+  }
+
+  public async like(provider: any, collectionAddress: string) {
+    await getCyberConnectSDK(provider).connect(collectionAddress, undefined, ConnectionType.LIKE);
+  }
+
+  public async unlike(provider: any, collectionAddress: string) {
+    await getCyberConnectSDK(provider).disconnect(collectionAddress);
   }
 }

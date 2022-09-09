@@ -6,6 +6,8 @@ import SolFrenWallet from '../../protocols/solfren-wallet';
 import { WalletInfo } from '../../protocols/solfren-wallet/types';
 import TwitterAPI from '../../protocols/twitter';
 import WonkaAPI from '../../protocols/wonka';
+import { ConnectionType } from '@cyberlab/cyberconnect';
+import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
 
 export default class Profile {
   private solFrenWallet: SolFrenWallet;
@@ -115,5 +117,13 @@ export default class Profile {
     }
 
     return walletInfo;
+  }
+
+  public async follow(provider: any, walletAddress: string) {
+    await getCyberConnectSDK(provider).connect(walletAddress, undefined, ConnectionType.FOLLOW);
+  }
+
+  public async unfollow(provider: any, walletAddress: string) {
+    await getCyberConnectSDK(provider).disconnect(walletAddress);
   }
 }
