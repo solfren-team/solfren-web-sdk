@@ -16,6 +16,7 @@ export default class MetaplexAuctionHouse {
     this.mx = Metaplex.make(this.conn);
   }
 
+  // constructor cannot execute async/await, so define this function here. 
   private async getAuctionHouse() {
     if (!this.auctionHouse) {
       this.auctionHouse = await this.mx
@@ -32,7 +33,7 @@ export default class MetaplexAuctionHouse {
     price: number
   ) {
     const ah = await this.getAuctionHouse();
-    const resp = await this.mx
+    return await this.mx
       .use(walletIdentity)
       .auctions()
       .for(ah)
@@ -43,7 +44,6 @@ export default class MetaplexAuctionHouse {
         tokens: token(1)
       })
       .run()
-    return resp;
   }
 
   public async makeOffer(
@@ -53,7 +53,7 @@ export default class MetaplexAuctionHouse {
     price: number
   ) {
     const ah = await this.getAuctionHouse();
-    const resp = await this.mx
+    return await this.mx
       .use(walletIdentity)
       .auctions()
       .for(ah)
@@ -64,7 +64,6 @@ export default class MetaplexAuctionHouse {
         tokens: token(1)
       })
       .run()
-    return resp;
   }
 
   public async instantBuy(
@@ -90,13 +89,12 @@ export default class MetaplexAuctionHouse {
         tokens: token(1)
       })
       .run()
-    const executeResp = ahClient
+    return ahClient
       .executeSale({
         listing: listing,
         bid: bidResp.bid
       })
       .run();
-    return executeResp;
   }
 
   public async instantSell(
@@ -122,12 +120,11 @@ export default class MetaplexAuctionHouse {
         tokens: token(1)
       })
       .run()
-    const executeResp = await ahClient
+    return await ahClient
       .executeSale({
         listing: listingResp.listing,
         bid: bidding
       })
       .run();
-    return executeResp;
   }
 }
