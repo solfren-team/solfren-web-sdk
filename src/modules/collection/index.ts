@@ -2,19 +2,22 @@ import assert from 'assert';
 import SolFrenAPI from "../../protocols/solfren-nft";
 import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
-import { CollectionResource, ItemResource, ItemOwnerResource } from "./types";
+import { CollectionResource, ItemResource, ItemOwnerResource, ListActivitiesResponse } from "./types";
 import { Config } from '../../types';
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 import WonkaAPI from '../../protocols/wonka';
 import { NftEdge } from '../../protocols/wonka/types';
 import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
 import { ConnectionType } from '@cyberlab/cyberconnect';
+import SolFrenNftTrans from '../../protocols/solfren-nft-trans';
+import { Transaction } from '../../protocols/solfren-nft-trans/types';
 
 export default class Collection {
   private solFrenAPI: SolFrenAPI;
   private marketplaces: Record<string, MarketplaceAPI> = marketplaces;
   private solanaConn: Connection;
   private wonkaAPI: WonkaAPI;
+  private solFrenNftTrans: SolFrenNftTrans;
 
   public constructor(config: Config) {
     assert(config?.solFrenAPI?.apiKey);
@@ -24,6 +27,7 @@ export default class Collection {
     this.solFrenAPI = new SolFrenAPI(config.solFrenAPI.apiKey);
     this.solanaConn = new Connection(config.solanaRPC.endpoint);
     this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
+    this.solFrenNftTrans = new SolFrenNftTrans(config.solFrenAPI.apiKey);
   }
 
   public async get(id: string): Promise<CollectionResource | null> {
@@ -81,6 +85,30 @@ export default class Collection {
     // TODO: handle `collected`
 
     return [items, nextCursor];
+  }
+
+  public async listActivities(id: string, size: number = 30, cursor?: string): Promise<ListActivitiesResponse> {
+    const [trans, nextCursor] = await this.solFrenNftTrans.listTradesByCollection(id, size, cursor);
+
+    // TODO: handle `followed`
+
+    return {
+      activities: trans.map((transaction: Transaction) => ({
+        id: transaction.signature,
+        price: transaction.price,
+        item: {
+          id: transaction.nftInfo.mintAddress,
+          name: transaction.nftInfo.name,
+          image: transaction.nftInfo.uriMetadata.image ?? "",
+          categories: transaction.nftInfo.collectionInfo?.categories,
+          owner: null,
+        },
+        buyer: { id: transaction.targetAddress ?? "" },
+        seller: { id: transaction.ownerAddress },
+        timestamp: transaction.timestamp,
+      })),
+      cursor: nextCursor,
+    }
   }
 
   // getOwnerOfNFT returns owner of nft,
