@@ -1,5 +1,3 @@
-export * from './types';
-
 import { Client, errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SolNFTTransaction, CollectionInfo, SolNFTTransSale, TransactionType } from './types';
@@ -22,7 +20,6 @@ export default class SolFrenAPI {
   }
 
   public async getNFTTransactions(from: number = 0, size: number = 20, filterByAddresses: string[], hasCollection?: boolean): Promise<SolNFTTransaction[]> {
-
     let filterByAddressQuery: QueryDslQueryContainer = (filterByAddresses.length > 0) ? {
       bool: {
         should: [
