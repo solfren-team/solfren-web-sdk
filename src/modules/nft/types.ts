@@ -23,7 +23,7 @@ export interface ItemResource {
   // image is the image url of NFT.
   image: string;
   // owner is the owner of NFT.
-  owner: ItemOwnerResource | null;
+  owner?: ItemOwnerResource | null;
   // collected indicates if collected by present member.
   collected?: boolean;
   // categories is inherited from collection.

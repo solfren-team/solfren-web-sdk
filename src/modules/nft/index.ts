@@ -108,6 +108,35 @@ export default class NFT {
     }
   }
 
+  /**
+   * listByWallet returns NFTs and nextCursor.
+   * @param walletAddress
+   * @param size
+   * @param cursor
+   * @returns [nfts, nextCursor]
+   */
+  public async listByWallet(walletAddress: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
+    let nfts: NftEdge[] | null;
+    try {
+      nfts = await this.wonkaAPI.nftsByWallet(walletAddress, size, cursor);
+    } catch (err) {
+      return [[], ""];
+    }
+
+    const items: ItemResource[] = [];
+    let nextCursor: string = '';
+    for (const nft of nfts) {
+      items.push({
+        id: nft.node.id,
+        name: nft.node.name,
+        image: nft.node.image.orig,
+      });
+      nextCursor = nft.cursor;
+    }
+
+    return [items, nextCursor];
+  }
+
   // getOwner returns owner of nft,
   // refer to https://solanacookbook.com/references/nfts.html#how-to-get-the-owner-of-an-nft.
   private async getOwner(mintAddress: string): Promise<ItemOwnerResource | null> {
