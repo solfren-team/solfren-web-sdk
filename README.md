@@ -67,18 +67,21 @@ const profile = new Profile({
   twitter: {
     apiKey: '{YOUR_TWITTER_API_KEY}',
   },
+  cyberConnect: {
+    endpoint: 'https://api.cybertino.io/connect/',
+  },
 });
 const profileResp = await profile.get('the-wallet-address');
 console.log('profile', profileResp);
 
 ```
 
-### Collection Module
+### NFT Module
 
 ```
-import Collection from '../src/modules/collection';
+import NFT from '../src/modules/nft';
 
-const collection = new Collection({
+const nft = new NFT({
   solFrenAPI: {
     apiKey: "X0ZVQ2ZZSUJ1c2ZkYW5GWm1nR1I6Nm00YU1JamZUbGE1dlExekkyZzRWQQ=="
   },
@@ -93,12 +96,12 @@ const collection = new Collection({
 const id = 'HhDDF8djnQnty2WJTxsy5VRNMutbPPd5xCtujieHBPAu'; // collection key
 
 {
-  const resp = await collection.get(id);
+  const resp = await nft.getCollection(id);
   console.log(resp);
 }
 
 {
-  const [nfts, cursor] = await collection.listNfts(id);
+  const [nfts, cursor] = await nft.listByCollection(id);
   console.log(nfts);
   console.log(cursor);
 }
