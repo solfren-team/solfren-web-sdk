@@ -7,6 +7,9 @@ import { SolNFTTransaction, CollectionInfo } from './types';
 export default class SolFrenAPI {
   private client: Client;
 
+  private INDEX_COLLECTION = 'sol-collections';
+  private INDEX_NFT_TRANS = 'sol-nft-trans';
+
   public constructor(apiKey: String) {
     //TODO: don't access ES from SDK directly, use solfren-api instead.
     this.client = new Client({
@@ -71,7 +74,7 @@ export default class SolFrenAPI {
     }
 
     const resp = await this.client.search<SolNFTTransaction>({
-      index: 'sol-nft-trans',
+      index: this.INDEX_NFT_TRANS,
       from: from,
       size: size,
       query: {
@@ -89,7 +92,7 @@ export default class SolFrenAPI {
 
   public async getCollection(id: string): Promise<CollectionInfo | null> {
     const resp = await this.client.get<CollectionInfo>({
-      index: 'sol-collections',
+      index: this.INDEX_COLLECTION,
       id,
     }).catch(ex => {
       if (
