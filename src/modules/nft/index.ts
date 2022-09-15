@@ -9,15 +9,13 @@ import WonkaAPI from '../../protocols/wonka';
 import { NftEdge } from '../../protocols/wonka/types';
 import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
 import { ConnectionType } from '@cyberlab/cyberconnect';
-import SolFrenNftTrans from '../../protocols/solfren-nft-trans';
-import { Transaction } from '../../protocols/solfren-nft-trans/types';
+import { SolNFTTransSale } from "../../protocols/solfren-nft/types";
 
 export default class NFT {
   private solFrenAPI: SolFrenAPI;
   private marketplaces: Record<string, MarketplaceAPI> = marketplaces;
   private solanaConn: Connection;
   private wonkaAPI: WonkaAPI;
-  private solFrenNftTrans: SolFrenNftTrans;
 
   public constructor(config: Config) {
     assert(config?.solFrenAPI?.apiKey);
@@ -27,7 +25,6 @@ export default class NFT {
     this.solFrenAPI = new SolFrenAPI(config.solFrenAPI.apiKey);
     this.solanaConn = new Connection(config.solanaRPC.endpoint);
     this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
-    this.solFrenNftTrans = new SolFrenNftTrans(config.solFrenAPI.apiKey);
   }
 
   public async getCollection(id: string): Promise<CollectionResource | null> {
@@ -88,12 +85,12 @@ export default class NFT {
   }
 
   public async listActivities(id: string, size: number = 30, cursor?: string): Promise<ListActivitiesResponse> {
-    const [trans, nextCursor] = await this.solFrenNftTrans.listTradesByCollection(id, size, cursor);
+    const [trans, nextCursor] = await this.solFrenAPI.listTradesByCollection(id, size, cursor);
 
     // TODO: handle `followed`
 
     return {
-      activities: trans.map((transaction: Transaction) => ({
+      activities: trans.map((transaction: SolNFTTransSale) => ({
         id: transaction.signature,
         price: transaction.price,
         item: {
