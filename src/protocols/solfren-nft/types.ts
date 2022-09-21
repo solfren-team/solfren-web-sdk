@@ -90,3 +90,9 @@ export interface SolNFTTransSale extends SolNFTTransaction {
 export interface SolNFTTransOwnerPost extends SolNFTTransaction {
   message: string;
 }
+
+export interface CollectionComment {
+  author: string;
+  content: string;
+  createdAt: Date;
+}

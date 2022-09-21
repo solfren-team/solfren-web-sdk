@@ -2,7 +2,7 @@ import assert from 'assert';
 import SolFrenAPI from "../../protocols/solfren-nft";
 import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
-import { CollectionResource, ItemResource, ItemOwnerResource, ListActivitiesResponse } from "./types";
+import { CollectionResource, ItemResource, ItemOwnerResource, ListActivitiesResponse, CommentResource } from "./types";
 import { Config } from '../../types';
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 import WonkaAPI from '../../protocols/wonka';
@@ -105,6 +105,20 @@ export default class NFT {
         timestamp: transaction.timestamp,
       })),
       cursor: nextCursor,
+    }
+  }
+
+  public async createCollectionComment(id: string, author: string, content: string): Promise<CommentResource> {
+    const resp = await this.solFrenAPI.createCollectionComment(id, author, content);
+    const owner = await this.getOwner(resp.author);
+
+    return {
+      content: resp.content,
+      createdAt: resp.createdAt,
+      owner: {
+        id: author,
+        avatar: owner?.avatar
+      },
     }
   }
 

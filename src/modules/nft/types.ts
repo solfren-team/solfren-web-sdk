@@ -52,3 +52,9 @@ export interface ListActivitiesResponse {
   activities: ActivityResource[];
   cursor: string;
 }
+
+export interface CommentResource {
+  content: string;
+  createdAt: Date;
+  owner: ItemOwnerResource;
+}

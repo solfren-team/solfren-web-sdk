@@ -27,8 +27,13 @@ import NFT from '../src/modules/nft';
   }
 
   {
-    const resp = await collection.listActivities(id);
+    const resp = await nft.listActivities(id);
     console.log(resp.activities);
     console.log(resp.cursor);
+  }
+
+  {
+    const resp = await nft.createCollectionComment(id, 'test-author-address', 'test-content');
+    console.log(resp);
   }
 })()
