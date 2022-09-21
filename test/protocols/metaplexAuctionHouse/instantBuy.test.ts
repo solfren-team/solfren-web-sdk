@@ -42,6 +42,9 @@ test('[metaplexAuctionHouse] instant buy with the same price.', async (t: Test) 
 
   console.log(`listed NFT:[${nft.mint.address.toBase58()}] signature:[${listResp.response.signature}] listTradeStateAddr:[${listResp.listing.tradeStateAddress.toBase58()}] sellerTradeState:[${listResp.sellerTradeState.toBase58()}]`)
 
+  t.equal(listResp.response.confirmResponse.value.err, null), "listResp has no error.";
+  t.equal(listResp.seller.toBase58(), (await seller).publicKey.toBase58(), "same seller publicKey");
+
   console.debug("instant buying...")
   const instantBuyResp = await auctionHouse.instantBuy(
     keypairIdentity(buyerWallet),
@@ -52,6 +55,10 @@ test('[metaplexAuctionHouse] instant buy with the same price.', async (t: Test) 
   )
 
   console.log(`bought NFT:[${nft.mint.address.toBase58()}] signature:[${instantBuyResp.response.signature}] sellerTradeState:[${instantBuyResp.sellerTradeState.toBase58()}]`)
+
+  t.equal(instantBuyResp.response.confirmResponse.value.err, null), "instantBuyResp has no error.";
+  t.equal(instantBuyResp.seller.toBase58(), (await seller).publicKey.toBase58(), "same seller publicKey");
+  t.equal(instantBuyResp.buyer.toBase58(), (await buyer).publicKey.toBase58(), "same buyer publicKey");
 
   t.ok( instantBuyResp.receipt != null , "instant buy recept not null.")
 });
