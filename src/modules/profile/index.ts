@@ -65,7 +65,7 @@ export default class Profile {
       }
     }
 
-    const followingInfo = await this.cyberConnect.getFollowingCount(walletAddress);
+    const cyberConnectIdentity = await this.cyberConnect.getIdentity(walletAddress);
 
     return {
       wallet: {
@@ -80,8 +80,9 @@ export default class Profile {
           name: wallet.selectedAvatarNFT?.name,
           imageUrl: wallet.selectedAvatarNFT?.image_url,
         },
-        followerCount: followingInfo?.followerCount,
-        followingCount: followingInfo?.followingCount,
+        followerCount: cyberConnectIdentity?.followerCount,
+        followingCount: cyberConnectIdentity?.followingCount,
+        github: cyberConnectIdentity?.github,
       },
       statistics: {
         volume30DaysSum: topProfile?.sum ?? 0,

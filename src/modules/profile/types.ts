@@ -1,3 +1,5 @@
+import { Github } from "../../protocols/cyberconnect/types"
+
 export interface ProfileItem {
   wallet: Wallet
   statistics: Statistics
@@ -9,6 +11,7 @@ export interface Wallet {
   description?: string
   twitterHandle?: string
   twitter?: Twitter
+  github?: Github
   solanaDomain?: string
   achievements?: Array<string>
   selectedAvatarNFT?: {

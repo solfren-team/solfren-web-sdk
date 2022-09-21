@@ -1,5 +1,5 @@
 import { GraphQLClient, gql } from 'graphql-request'
-import { FollowingCount } from './types';
+import { FollowingCount, Identity } from './types';
 
 export default class CyberConnect {
   private client: GraphQLClient;
@@ -8,12 +8,25 @@ export default class CyberConnect {
     this.client = new GraphQLClient(endpoint);
   }
 
-  public async getFollowingCount(walletAddress: string): Promise<FollowingCount | null> {
+  public async getIdentity(walletAddress: string): Promise<Identity | null> {
     const query = gql`
       query($address: String!) {
         identity(address: $address) {
           followerCount
           followingCount
+          twitter {
+            handle
+            avatar
+            verified
+            tweetId
+            source
+            followerCount
+          }
+          github {
+            username
+            gistId
+            userId
+          }
         }
       }
     `;
@@ -22,10 +35,10 @@ export default class CyberConnect {
     };
 
     return this.client
-      .request<{ identity: FollowingCount }>(query, variables)
+      .request<{ identity: Identity }>(query, variables)
       .then((res) => res.identity)
       .catch((err) => {
-        console.error('failed to getFollowingCount', err);
+        console.error('failed to identity', err);
         return null;
       });
   }
