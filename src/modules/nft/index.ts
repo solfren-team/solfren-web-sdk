@@ -60,13 +60,7 @@ export default class NFT {
    * @returns [nfts, nextCursor]
    */
   public async listByCollection(id: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
-    let nfts: NftEdge[] | null;
-    try {
-      nfts = await this.wonkaAPI.nftsByCollection(id, size, cursor);
-    } catch (err) {
-      return [[], ""];
-    }
-
+    const nfts = await this.wonkaAPI.nftsByCollection(id, size, cursor);
     const items: ItemResource[] = [];
     let nextCursor: string = '';
     for (const nft of nfts) {
@@ -116,13 +110,7 @@ export default class NFT {
    * @returns [nfts, nextCursor]
    */
   public async listByWallet(walletAddress: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
-    let nfts: NftEdge[] | null;
-    try {
-      nfts = await this.wonkaAPI.nftsByWallet(walletAddress, size, cursor);
-    } catch (err) {
-      return [[], ""];
-    }
-
+    const nfts = await this.wonkaAPI.nftsByWallet(walletAddress, size, cursor);
     const items: ItemResource[] = [];
     let nextCursor: string = '';
     for (const nft of nfts) {
