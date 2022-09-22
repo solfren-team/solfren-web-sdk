@@ -60,13 +60,7 @@ export default class NFT {
    * @returns [nfts, nextCursor]
    */
   public async listByCollection(id: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
-    let nfts: NftEdge[] | null;
-    try {
-      nfts = await this.wonkaAPI.nftsByCollection(id, size, cursor);
-    } catch (err) {
-      return [[], ""];
-    }
-
+    const nfts = await this.wonkaAPI.nftsByCollection(id, size, cursor);
     const items: ItemResource[] = [];
     let nextCursor: string = '';
     for (const nft of nfts) {
@@ -106,6 +100,29 @@ export default class NFT {
       })),
       cursor: nextCursor,
     }
+  }
+
+  /**
+   * listByWallet returns NFTs and nextCursor.
+   * @param walletAddress
+   * @param size
+   * @param cursor
+   * @returns [nfts, nextCursor]
+   */
+  public async listByWallet(walletAddress: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
+    const nfts = await this.wonkaAPI.nftsByWallet(walletAddress, size, cursor);
+    const items: ItemResource[] = [];
+    let nextCursor: string = '';
+    for (const nft of nfts) {
+      items.push({
+        id: nft.node.id,
+        name: nft.node.name,
+        image: nft.node.image.orig,
+      });
+      nextCursor = nft.cursor;
+    }
+
+    return [items, nextCursor];
   }
 
   // getOwner returns owner of nft,

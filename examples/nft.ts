@@ -27,8 +27,14 @@ import NFT from '../src/modules/nft';
   }
 
   {
-    const resp = await collection.listActivities(id);
+    const resp = await nft.listActivities(id);
     console.log(resp.activities);
     console.log(resp.cursor);
+  }
+
+  {
+    const [nfts, cursor] = await nft.listByWallet('6zsuBDfuvtxK5FD9tf8u8LfrYBVnxDWRhj43snmC6Qx6');
+    console.log(nfts);
+    console.log(cursor);
   }
 })()

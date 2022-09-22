@@ -93,4 +93,39 @@ export default class WonkaAPI {
       return undefined;
     }
   }
+
+  public async nftsByWallet(walletAddress: string, limit: number = 30, cursor?: string): Promise<NftEdge[]> {
+    let cursorQuery = `first: ${limit}`;
+    if (cursor) {
+      cursorQuery += `, after: "${cursor}"`;
+    }
+    const query = gql`
+    {
+      nftsByWallet(wallet: "${walletAddress}", ${cursorQuery}) {
+        edges {
+          node {
+            id
+            name
+            symbol
+            image {
+              orig
+            }
+            metaplex_metadata {
+              mint
+              creators {
+                address
+                verified
+                share
+              }
+            }
+          }
+          cursor
+        }
+      }
+    }`;
+
+    return this.client
+      .request(query)
+      .then((data) => data['nftsByWallet']['edges']);
+  }
 }
