@@ -78,7 +78,7 @@ export default class NFT {
     return [items, nextCursor];
   }
 
-  public async listActivities(id: string, size: number = 30, cursor?: string): Promise<ListActivitiesResponse> {
+  public async listActivitiesByCollection(id: string, size: number = 30, cursor?: string): Promise<ListActivitiesResponse> {
     const [trans, nextCursor] = await this.solFrenAPI.listTradesByCollection(id, size, cursor);
 
     // TODO: handle `followed`
