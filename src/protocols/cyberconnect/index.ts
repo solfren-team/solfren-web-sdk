@@ -10,8 +10,8 @@ export default class CyberConnect {
 
   public async getIdentity(walletAddress: string): Promise<Identity | null> {
     const query = gql`
-      query($address: String!) {
-        identity(address: $address) {
+      query FullIdentityQuery($address: String!) {
+        identity(address: $address, network: SOLANA) {
           followerCount
           followingCount
           twitter {

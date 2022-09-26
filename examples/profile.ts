@@ -15,6 +15,6 @@ import Profile from '../src/modules/profile';
       endpoint: 'https://api.cybertino.io/connect/',
     },
   });
-  const profileResp = await profile.get('the-wallet-address');
+  const profileResp = await profile.get('2NoEcR9cC7Rn6bP9rBpky6B1eP9syyPf8FXRaf1myChv');
   console.log('profile', profileResp);
 })()
