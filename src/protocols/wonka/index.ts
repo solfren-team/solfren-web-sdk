@@ -6,6 +6,55 @@ import { NftEdge } from './types';
 
 export default class WonkaAPI {
   private client: GraphQLClient;
+  private GQL_STR_NFT: string = `
+  node {
+    id
+    name
+    symbol
+    image {
+      orig
+    }
+    owner {
+      address
+      sol_domain
+      twitter_handle
+    }
+    metaplex_metadata {
+      mint
+      name
+      symbol
+      primary_sale_happened
+      seller_fee_basis_points
+      is_mutable
+      token_standard
+      uses {
+        use_method
+        remaining
+        total
+      }
+      collection {
+        verified
+        key
+      }
+      creators {
+        address
+        verified
+        share
+      }
+    }
+    external_metadata {
+      collection {
+        name
+        family
+      }
+      attributes {
+        trait_type
+        value
+        display_type
+      }
+    }
+  }
+  `
 
   public constructor(endpoint: string) {
     this.client = new GraphQLClient(endpoint);
@@ -22,26 +71,7 @@ export default class WonkaAPI {
             after: "${cursor}"
           ) {
             edges {
-              node {
-                id
-                name
-                symbol
-                owner {
-                  address
-                  sol_domain
-                }
-                image {
-                  orig
-                }
-                metaplex_metadata {
-                  mint
-                  creators {
-                    address
-                    verified
-                    share
-                  }
-                }
-              }
+              ${this.GQL_STR_NFT}
               cursor
             }
           }
@@ -54,26 +84,7 @@ export default class WonkaAPI {
             first: ${limit}
           ) {
             edges {
-              node {
-                id
-                name
-                symbol
-                owner {
-                  address
-                  sol_domain
-                }
-                image {
-                  orig
-                }
-                metaplex_metadata {
-                  mint
-                  creators {
-                    address
-                    verified
-                    share
-                  }
-                }
-              }
+              ${this.GQL_STR_NFT}
               cursor
             }
           }
@@ -103,22 +114,7 @@ export default class WonkaAPI {
     {
       nftsByWallet(wallet: "${walletAddress}", ${cursorQuery}) {
         edges {
-          node {
-            id
-            name
-            symbol
-            image {
-              orig
-            }
-            metaplex_metadata {
-              mint
-              creators {
-                address
-                verified
-                share
-              }
-            }
-          }
+          ${this.GQL_STR_NFT}
           cursor
         }
       }

@@ -1,3 +1,5 @@
+import { integer } from "@elastic/elasticsearch/lib/api/types";
+
 export interface CollectionItem {
   id: string;
   name: string;
@@ -16,8 +18,8 @@ export interface CollectionItem {
 }
 
 export interface NFTItem {
-  // id is the NFT mint address.
-  id: string;
+  // NFT mint address.
+  mintAddress: string;
   // name is the NFT name.
   name: string;
   // image is the image url of NFT.
@@ -28,11 +30,61 @@ export interface NFTItem {
   collected?: boolean;
   // categories is inherited from collection.
   categories?: string[];
+  // metaplex metadata
+  metaplexMetadata: MetaplexMetadata;
+  // external metadata
+  externalMetadata: ExternalMetadata;
+}
+
+export interface MetaplexMetadata {
+  symbol: string;
+  primarySaleHappened: boolean;
+  sellerFeeBasisPoints: integer;
+  isMutable: boolean;
+  tokenStandard?: string;
+  uses?: MetaplexMetadataNFTUses;
+  collection?: {
+    verified: boolean;
+    key: string;
+  };
+  creators: {
+    address: string;
+    verified: boolean;
+    share: number
+  }[];
+}
+
+export interface MetaplexMetadataNFTUses {
+  useMethod: string;
+  remaining: integer;
+  total: integer
+}
+
+export interface ExternalMetadata {
+  collection?: {
+    name: string;
+    family: string;
+  };
+  attributes?: {
+    traitType?: string;
+    value?: string;
+    displayType?: string;
+  }[];
+}
+
+export interface ExternalMetadataAttribute {
+  traitType: string;
+  value: string;
+  displayType: string;
 }
 
 export interface OwnerInfo {
-  // id is the public address of owner.
-  id: string;
+  // public address of owner.
+  address: string;
+  // Bonfida Solana Domain
+  solanaDomain?: string;
+  // Twitter handle
+  twitterHandle?: string;
   // avatar is the avatar of owner.
   avatar?: string;
   // followed indicates if you followed this account or not.
