@@ -1,4 +1,4 @@
-export interface CollectionResource {
+export interface CollectionItem {
   id: string;
   name: string;
   symbol: string;
@@ -15,7 +15,7 @@ export interface CollectionResource {
   createdAt: Date;
 }
 
-export interface ItemResource {
+export interface NFTItem {
   // id is the NFT mint address.
   id: string;
   // name is the NFT name.
@@ -23,14 +23,14 @@ export interface ItemResource {
   // image is the image url of NFT.
   image: string;
   // owner is the owner of NFT.
-  owner?: ItemOwnerResource | null;
+  owner?: OwnerInfo | null;
   // collected indicates if collected by present member.
   collected?: boolean;
   // categories is inherited from collection.
   categories?: string[];
 }
 
-export interface ItemOwnerResource {
+export interface OwnerInfo {
   // id is the public address of owner.
   id: string;
   // avatar is the avatar of owner.
@@ -39,16 +39,16 @@ export interface ItemOwnerResource {
   followed?: boolean;
 }
 
-export interface ActivityResource {
+export interface ActivityItem {
   id: string;
-  item: ItemResource;
+  item: NFTItem;
   price: number;
-  buyer: ItemOwnerResource;
-  seller: ItemOwnerResource;
+  buyer: OwnerInfo;
+  seller: OwnerInfo;
   timestamp: Date;
 }
 
 export interface ListActivitiesResponse {
-  activities: ActivityResource[];
+  activities: ActivityItem[];
   cursor: string;
 }

@@ -2,7 +2,7 @@ import assert from 'assert';
 import SolFrenAPI from "../../protocols/solfren-nft";
 import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
-import { CollectionResource, ItemResource, ItemOwnerResource, ListActivitiesResponse } from "./types";
+import { CollectionItem, NFTItem, OwnerInfo, ListActivitiesResponse } from "./types";
 import { Config } from '../../types';
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 import WonkaAPI from '../../protocols/wonka';
@@ -27,7 +27,7 @@ export default class NFT {
     this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
   }
 
-  public async getCollection(id: string): Promise<CollectionResource | null> {
+  public async getCollection(id: string): Promise<CollectionItem | null> {
     const collection = await this.solFrenAPI.getCollection(id);
     if (collection) {
       let stats: CollectionStats | null = null;
@@ -59,13 +59,13 @@ export default class NFT {
    * @param cursor
    * @returns [nfts, nextCursor]
    */
-  public async listByCollection(id: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
+  public async listByCollection(id: string, size: number = 30, cursor?: string): Promise<[NFTItem[], string]> {
     const nfts = await this.wonkaAPI.nftsByCollection(id, size, cursor);
-    const items: ItemResource[] = [];
+    const items: NFTItem[] = [];
     let nextCursor: string = '';
     for (const nft of nfts) {
       items.push({
-        id: nft.node.id,
+        mintAddress: nft.node.id,
         name: nft.node.name,
         image: nft.node.image.orig,
         owner: await this.getOwner(nft.node.owner.address),
@@ -109,13 +109,13 @@ export default class NFT {
    * @param cursor
    * @returns [nfts, nextCursor]
    */
-  public async listByWallet(walletAddress: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
+  public async listByWallet(walletAddress: string, size: number = 30, cursor?: string): Promise<[NFTItem[], string]> {
     const nfts = await this.wonkaAPI.nftsByWallet(walletAddress, size, cursor);
-    const items: ItemResource[] = [];
+    const items: NFTItem[] = [];
     let nextCursor: string = '';
     for (const nft of nfts) {
       items.push({
-        id: nft.node.id,
+        mintAddress: nft.node.id,
         name: nft.node.name,
         image: nft.node.image.orig,
       });
@@ -127,12 +127,12 @@ export default class NFT {
 
   // getOwner returns owner of nft,
   // refer to https://solanacookbook.com/references/nfts.html#how-to-get-the-owner-of-an-nft.
-  private async getOwner(mintAddress: string): Promise<ItemOwnerResource | null> {
+  private async getOwner(mintAddress: string): Promise<OwnerInfo | null> {
     try {
       const tokenLargestAccounts = await this.solanaConn.getTokenLargestAccounts(new PublicKey(mintAddress));
       const parsedAccountInfo = await this.solanaConn.getParsedAccountInfo(tokenLargestAccounts.value[0].address);
       return {
-        id: (parsedAccountInfo.value?.data as ParsedAccountData).parsed.info.owner,
+        address: (parsedAccountInfo.value?.data as ParsedAccountData).parsed.info.owner,
       };
     } catch (err) {
       // TODO: handle err
