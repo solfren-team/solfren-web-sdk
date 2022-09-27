@@ -1,10 +1,11 @@
 import assert from 'assert';
-import SolFrenAPI, { SolNFTTransaction, SolNFTTransSale } from '../../protocols/solfren-nft';
+import SolFrenAPI from '../../protocols/solfren-nft';
 import SolFrenWallet from '../../protocols/solfren-wallet';
 import { Wallet } from '../profile/types'
 import { Action, FeedItem, FeedType } from './types';
 import { Config } from '../../types';
 import { WalletInfo } from '../../protocols/solfren-wallet/types';
+import { SolNFTTransaction, SolNFTTransSale } from '../../protocols/solfren-nft/types';
 
 export class NFTFeed {
     private solFrenAPI: SolFrenAPI;
