@@ -8,6 +8,7 @@ import TwitterAPI from '../../protocols/twitter';
 import WonkaAPI from '../../protocols/wonka';
 import { ConnectionType } from '@cyberlab/cyberconnect';
 import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
+import { PublicKey } from '@solana/web3.js';
 
 export default class Profile {
   private solFrenWallet: SolFrenWallet;
@@ -28,6 +29,8 @@ export default class Profile {
   }
 
   public async get(walletAddress: string): Promise<ProfileItem> {
+    // check walletAddress is a valid address.
+    const walletAddressKey = new PublicKey(walletAddress);
     let wallet = await this.solFrenWallet.getWallet(walletAddress);
     if (!wallet.twitterHandle || !wallet.solanaDomain) {
       wallet = await this.syncWithBonfida(wallet);
