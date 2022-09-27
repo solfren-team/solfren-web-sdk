@@ -26,6 +26,7 @@ export default class SolFrenWallet {
       return resp._source as WalletInfo;
     } catch (err: any) {
       // try to fill up wallet info
+      console.log("failed to getWallet addr:[$s]", walletAddress, err);
       await this.createWallet(walletAddress);
 
       return {

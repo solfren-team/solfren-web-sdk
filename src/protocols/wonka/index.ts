@@ -100,7 +100,7 @@ export default class WonkaAPI {
     try {
       return await Windex.fetchSolDomainMetadataByAddress(new PublicKey(walletAddress));
     } catch (err) {
-      console.error('failed to fetchSolDomainMetadata', err);
+      console.error('failed to fetchSolDomainMetadata wallet:[$s]', walletAddress, err);
       return undefined;
     }
   }
