@@ -1,5 +1,3 @@
-import { integer } from "@elastic/elasticsearch/lib/api/types";
-
 export interface CollectionItem {
   id: string;
   name: string;
@@ -23,7 +21,9 @@ export interface NFTItem {
   // name is the NFT name.
   name: string;
   // image is the image url of NFT.
-  image: string;
+  image?: string;
+  // description of NFT.
+  description: string;
   // owner is the owner of NFT.
   owner?: OwnerInfo | null;
   // collected indicates if collected by present member.
@@ -33,14 +33,15 @@ export interface NFTItem {
   // metaplex metadata
   metaplexMetadata: MetaplexMetadata;
   // external metadata
-  externalMetadata: ExternalMetadata;
+  externalMetadata?: ExternalMetadata;
 }
 
 export interface MetaplexMetadata {
-  symbol: string;
-  primarySaleHappened: boolean;
-  sellerFeeBasisPoints: integer;
-  isMutable: boolean;
+  name?: string;
+  symbol?: string;
+  primarySaleHappened?: boolean;
+  sellerFeeBasisPoints?: number;
+  isMutable?: boolean;
   tokenStandard?: string;
   uses?: MetaplexMetadataNFTUses;
   collection?: {
@@ -56,14 +57,17 @@ export interface MetaplexMetadata {
 
 export interface MetaplexMetadataNFTUses {
   useMethod: string;
-  remaining: integer;
-  total: integer
+  remaining: number;
+  total: number
 }
 
 export interface ExternalMetadata {
+  description?: string;
+  externalUrl?: string;
+  animationUrl?: string;
   collection?: {
-    name: string;
-    family: string;
+    name?: string;
+    family?: string;
   };
   attributes?: {
     traitType?: string;

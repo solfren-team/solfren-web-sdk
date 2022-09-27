@@ -43,6 +43,9 @@ export default class WonkaAPI {
       }
     }
     external_metadata {
+      description
+      animation_url
+      external_url
       collection {
         name
         family
@@ -52,6 +55,11 @@ export default class WonkaAPI {
         value
         display_type
       }
+    }
+    token_account {
+      id
+      mint
+      owner
     }
   }
   `

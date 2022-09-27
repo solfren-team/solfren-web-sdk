@@ -64,7 +64,7 @@ export default class NFT {
     const items: NFTItem[] = [];
     let nextCursor: string = '';
     for (const nft of nfts) {
-      var uses: MetaplexMetadataNFTUses | undefined;
+      let uses: MetaplexMetadataNFTUses | undefined;
       if(nft.node.metaplex_metadata.uses){
         uses = {
           useMethod: nft.node.metaplex_metadata.uses.use_method,
@@ -72,23 +72,25 @@ export default class NFT {
           total: nft.node.metaplex_metadata.uses.total
         }
       }
-      var attributes: ExternalMetadataAttribute[] = nft.node.external_metadata.attributes.map((attr) => {
+      const attributes: ExternalMetadataAttribute[] = nft.node.external_metadata?.attributes?.map((attr) => {
         return {
           traitType: attr.trait_type,
           value: attr.value,
           displayType: attr.display_type
         } as ExternalMetadataAttribute
-      })
+      }) || Array()
       items.push({
         mintAddress: nft.node.metaplex_metadata.mint,
-        name: nft.node.metaplex_metadata.name,
-        image: nft.node.image.orig,
+        name: nft.node.metaplex_metadata.name || nft.node.name,
+        image: nft.node.image?.orig,
+        description: nft.node.external_metadata?.description || "",
         owner: {
-          address: nft.node.owner.address,
-          solanaDomain: nft.node.owner.sol_domain,
-          twitterHandle: nft.node.owner.twitter_handle
+          address: nft.node.owner?.address || nft.node.token_account.owner,
+          solanaDomain: nft.node.owner?.sol_domain,
+          twitterHandle: nft.node.owner?.twitter_handle
         },
         metaplexMetadata: {
+          name: nft.node.metaplex_metadata.name,
           symbol: nft.node.metaplex_metadata.symbol,
           primarySaleHappened: nft.node.metaplex_metadata.primary_sale_happened,
           sellerFeeBasisPoints: nft.node.metaplex_metadata.seller_fee_basis_points,
@@ -99,7 +101,10 @@ export default class NFT {
           creators: nft.node.metaplex_metadata.creators
         },
         externalMetadata: {
-          collection: nft.node.external_metadata.collection,
+          description: nft.node.external_metadata?.description,
+          externalUrl: nft.node.external_metadata?.externalUrl,
+          animationUrl: nft.node.external_metadata?.animationUrl,
+          collection: nft.node.external_metadata?.collection,
           attributes: attributes
         }
       });
@@ -125,8 +130,10 @@ export default class NFT {
           name: transaction.nftInfo.name,
           image: transaction.nftInfo.uriMetadata.image ?? "",
           categories: transaction.nftInfo.collectionInfo?.categories,
+          description: transaction.nftInfo.uriMetadata.description || "",
           owner: null,
           metaplexMetadata: {
+            name: transaction.nftInfo.name,
             symbol: transaction.nftInfo.symbol,
             primarySaleHappened: transaction.nftInfo.primarySaleHappened,
             sellerFeeBasisPoints: transaction.nftInfo.sellerFeeBasisPoints,
@@ -145,6 +152,10 @@ export default class NFT {
             })
           },
           externalMetadata: {
+            description: transaction.nftInfo.uriMetadata.description,
+            externalUrl: transaction.nftInfo.uriMetadata.external_url,
+            // animationUrl: transaction.nftInfo.uriMetadata., => not support yet.
+            collection: transaction.nftInfo.uriMetadata.collection,
             attributes: transaction.nftInfo.uriMetadata.attributes?.map((attribute) => {
               return {
                 traitType: attribute.trait_type,
@@ -173,7 +184,7 @@ export default class NFT {
     const items: NFTItem[] = [];
     let nextCursor: string = '';
     for (const nft of nfts) {
-      var uses: MetaplexMetadataNFTUses | undefined;
+      let uses: MetaplexMetadataNFTUses | undefined;
       if(nft.node.metaplex_metadata.uses){
         uses = {
           useMethod: nft.node.metaplex_metadata.uses.use_method,
@@ -181,23 +192,25 @@ export default class NFT {
           total: nft.node.metaplex_metadata.uses.total
         }
       }
-      var attributes: ExternalMetadataAttribute[] = nft.node.external_metadata.attributes.map((attr) => {
+      const attributes: ExternalMetadataAttribute[] = nft.node.external_metadata?.attributes?.map((attr) => {
         return {
           traitType: attr.trait_type,
           value: attr.value,
           displayType: attr.display_type
         } as ExternalMetadataAttribute
-      })
+      }) || Array()
       items.push({
         mintAddress: nft.node.metaplex_metadata.mint,
-        name: nft.node.metaplex_metadata.name,
-        image: nft.node.image.orig,
+        name: nft.node.metaplex_metadata.name || nft.node.name,
+        image: nft.node.image?.orig,
+        description: nft.node.external_metadata?.description || "",
         owner: {
-          address: nft.node.owner.address,
-          solanaDomain: nft.node.owner.sol_domain,
-          twitterHandle: nft.node.owner.twitter_handle
+          address: nft.node.owner?.address || nft.node.token_account.owner,
+          solanaDomain: nft.node.owner?.sol_domain,
+          twitterHandle: nft.node.owner?.twitter_handle
         },
         metaplexMetadata: {
+          name: nft.node.metaplex_metadata.name,
           symbol: nft.node.metaplex_metadata.symbol,
           primarySaleHappened: nft.node.metaplex_metadata.primary_sale_happened,
           sellerFeeBasisPoints: nft.node.metaplex_metadata.seller_fee_basis_points,
@@ -208,7 +221,10 @@ export default class NFT {
           creators: nft.node.metaplex_metadata.creators
         },
         externalMetadata: {
-          collection: nft.node.external_metadata.collection,
+          description: nft.node.external_metadata?.description,
+          externalUrl: nft.node.external_metadata?.externalUrl,
+          animationUrl: nft.node.external_metadata?.animationUrl,
+          collection: nft.node.external_metadata?.collection,
           attributes: attributes
         }
       });
