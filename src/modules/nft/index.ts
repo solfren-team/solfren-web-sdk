@@ -234,21 +234,6 @@ export default class NFT {
     return [items, nextCursor];
   }
 
-  // getOwner returns owner of nft,
-  // refer to https://solanacookbook.com/references/nfts.html#how-to-get-the-owner-of-an-nft.
-  private async getOwner(mintAddress: string): Promise<OwnerInfo | null> {
-    try {
-      const tokenLargestAccounts = await this.solanaConn.getTokenLargestAccounts(new PublicKey(mintAddress));
-      const parsedAccountInfo = await this.solanaConn.getParsedAccountInfo(tokenLargestAccounts.value[0].address);
-      return {
-        address: (parsedAccountInfo.value?.data as ParsedAccountData).parsed.info.owner,
-      };
-    } catch (err) {
-      // TODO: handle err
-      return null;
-    }
-  }
-
   public async likeCollection(provider: any, collectionId: string) {
     await getCyberConnectSDK(provider).connect(collectionId, undefined, ConnectionType.LIKE);
   }
