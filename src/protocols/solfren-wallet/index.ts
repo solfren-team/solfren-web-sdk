@@ -26,6 +26,7 @@ export default class SolFrenWallet {
       return resp._source as WalletInfo;
     } catch (err: any) {
       // try to fill up wallet info
+      console.log("failed to getWallet addr:[$s]", walletAddress, err);
       await this.createWallet(walletAddress);
 
       return {
@@ -38,11 +39,15 @@ export default class SolFrenWallet {
   }
 
   public async getWallets(walletAddresses: string[]): Promise<Map<string, WalletInfo>> {
+    const walletInfos = new Map<string, WalletInfo>();
+    // bypass empty query
+    if(walletAddresses.length == 0) {
+      return walletInfos;
+    }
     const resp = await this.client.mget<WalletInfo>({
       index: this.INDEX_WALLET_INFOS,
       ids: walletAddresses,
     });
-    const walletInfos = new Map<string, WalletInfo>();
     for (const i in resp.docs) {
       const walletInfo = (resp.docs[i] as estypes.GetGetResult<WalletInfo>)._source;
       if (walletInfo) {

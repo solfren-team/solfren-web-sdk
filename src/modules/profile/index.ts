@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { Config } from '../../types';
-import { ProfileItem, Twitter } from './types';
+import { ProfileItem, Twitter, Wallet } from './types';
 import CyberConnect from '../../protocols/cyberconnect';
 import SolFrenWallet from '../../protocols/solfren-wallet';
 import { WalletInfo } from '../../protocols/solfren-wallet/types';
@@ -8,6 +8,8 @@ import TwitterAPI from '../../protocols/twitter';
 import WonkaAPI from '../../protocols/wonka';
 import { ConnectionType } from '@cyberlab/cyberconnect';
 import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
+import { PublicKey } from '@solana/web3.js';
+import { getConstantValue } from 'typescript';
 
 export default class Profile {
   private solFrenWallet: SolFrenWallet;
@@ -28,6 +30,8 @@ export default class Profile {
   }
 
   public async get(walletAddress: string): Promise<ProfileItem> {
+    // check walletAddress is a valid address.
+    const walletAddressKey = new PublicKey(walletAddress);
     let wallet = await this.solFrenWallet.getWallet(walletAddress);
     if (!wallet.twitterHandle || !wallet.solanaDomain) {
       wallet = await this.syncWithBonfida(wallet);
@@ -93,6 +97,63 @@ export default class Profile {
       },
     } as ProfileItem;
   };
+
+  public async listWallets(walletAddresses: string[]): Promise<Map<string, Wallet>> {
+    const wallets = new Map<string, Wallet>();
+
+    const walletsMap = await this.solFrenWallet.getWallets(walletAddresses);
+    console.debug("listWallets got size:[%s]", walletsMap.size, walletsMap.keys);
+    for(let k of walletsMap.keys()) {
+      const v = walletsMap.get(k)!;
+      console.debug("k:[$s] v:[$s]", k, v);
+      let twitter: Twitter | undefined;
+      if (v.twitterInfo) {
+        twitter = {
+          id: v.twitterInfo.id,
+          name: v.twitterInfo.name,
+          description: v.twitterInfo.description,
+          profileImageUrl: v.twitterInfo.profile_image_url,
+          location: v.twitterInfo.location,
+          username: v.twitterInfo.username,
+          verified: v.twitterInfo.verified,
+          publicMetrics: {
+            followersCount: v.twitterInfo.public_metrics.followers_count,
+            followingCount: v.twitterInfo.public_metrics.following_count,
+            tweetCount: v.twitterInfo.public_metrics.tweet_count,
+            listedCount: v.twitterInfo.public_metrics.listed_count,
+          }
+        } as Twitter;
+      }
+      const cyberConnectIdentity = await this.cyberConnect.getIdentity(k);
+
+      type SelectedAvatarNFT = {
+        name: string;
+        imageUrl: string;
+      } | undefined
+      let selectedAvatarNFT : SelectedAvatarNFT = undefined
+      if(v.selectedAvatarNFT) {
+        selectedAvatarNFT = {
+          name: v.selectedAvatarNFT!.name,
+          imageUrl: v.selectedAvatarNFT!.image_url,
+        };
+      }
+      wallets.set(k, {
+        address: k,
+        name: v.name,
+        description: v.description,
+        twitterHandle: v.twitterHandle,
+        twitter,
+        solanaDomain: v.solanaDomain,
+        achievements: v.achievements,
+        selectedAvatarNFT: selectedAvatarNFT,
+        followerCount: cyberConnectIdentity?.followerCount || 0,
+        followingCount: cyberConnectIdentity?.followingCount || 0,
+        github: cyberConnectIdentity?.github,        
+      })
+    }
+
+    return wallets;    
+  }
 
   private async syncWithBonfida(walletInfo: WalletInfo): Promise<WalletInfo> {
     const resp = await this.wonkaAPI.fetchSolDomainMetadata(walletInfo.walletAddress);

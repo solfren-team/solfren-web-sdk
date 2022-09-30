@@ -27,7 +27,7 @@ import NFT from '../src/modules/nft';
   }
 
   {
-    const resp = await nft.listActivities(id);
+    const resp = await nft.listActivitiesByCollection(id);
     console.log(resp.activities);
     console.log(resp.cursor);
   }

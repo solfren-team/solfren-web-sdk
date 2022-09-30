@@ -2,7 +2,7 @@ import assert from 'assert';
 import SolFrenAPI from "../../protocols/solfren-nft";
 import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
-import { CollectionResource, ItemResource, ItemOwnerResource, ListActivitiesResponse } from "./types";
+import { CollectionItem, NFTItem, OwnerInfo, ListActivitiesResponse, MetaplexMetadataNFTUses, ExternalMetadataAttribute } from "./types";
 import { Config } from '../../types';
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 import WonkaAPI from '../../protocols/wonka';
@@ -27,7 +27,7 @@ export default class NFT {
     this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
   }
 
-  public async getCollection(id: string): Promise<CollectionResource | null> {
+  public async getCollection(id: string): Promise<CollectionItem | null> {
     const collection = await this.solFrenAPI.getCollection(id);
     if (collection) {
       let stats: CollectionStats | null = null;
@@ -59,16 +59,54 @@ export default class NFT {
    * @param cursor
    * @returns [nfts, nextCursor]
    */
-  public async listByCollection(id: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
+  public async listByCollection(id: string, size: number = 30, cursor?: string): Promise<[NFTItem[], string]> {
     const nfts = await this.wonkaAPI.nftsByCollection(id, size, cursor);
-    const items: ItemResource[] = [];
+    const items: NFTItem[] = [];
     let nextCursor: string = '';
     for (const nft of nfts) {
+      let uses: MetaplexMetadataNFTUses | undefined;
+      if(nft.node.metaplex_metadata.uses){
+        uses = {
+          useMethod: nft.node.metaplex_metadata.uses.use_method,
+          remaining: nft.node.metaplex_metadata.uses.remaining,
+          total: nft.node.metaplex_metadata.uses.total
+        }
+      }
+      const attributes: ExternalMetadataAttribute[] = nft.node.external_metadata?.attributes?.map((attr) => {
+        return {
+          traitType: attr.trait_type,
+          value: attr.value,
+          displayType: attr.display_type
+        } as ExternalMetadataAttribute
+      }) || Array()
       items.push({
-        id: nft.node.id,
-        name: nft.node.name,
-        image: nft.node.image.orig,
-        owner: await this.getOwner(nft.node.owner.address),
+        mintAddress: nft.node.metaplex_metadata.mint,
+        name: nft.node.metaplex_metadata.name || nft.node.name,
+        image: nft.node.image?.orig,
+        description: nft.node.external_metadata?.description || "",
+        owner: {
+          address: nft.node.owner?.address || nft.node.token_account.owner,
+          solanaDomain: nft.node.owner?.sol_domain,
+          twitterHandle: nft.node.owner?.twitter_handle
+        },
+        metaplexMetadata: {
+          name: nft.node.metaplex_metadata.name,
+          symbol: nft.node.metaplex_metadata.symbol,
+          primarySaleHappened: nft.node.metaplex_metadata.primary_sale_happened,
+          sellerFeeBasisPoints: nft.node.metaplex_metadata.seller_fee_basis_points,
+          isMutable: nft.node.metaplex_metadata.is_mutable,
+          tokenStandard: nft.node.metaplex_metadata.token_standard,
+          uses: uses,
+          collection: nft.node.metaplex_metadata.collection,
+          creators: nft.node.metaplex_metadata.creators
+        },
+        externalMetadata: {
+          description: nft.node.external_metadata?.description,
+          externalUrl: nft.node.external_metadata?.externalUrl,
+          animationUrl: nft.node.external_metadata?.animationUrl,
+          collection: nft.node.external_metadata?.collection,
+          attributes: attributes
+        }
       });
       nextCursor = nft.cursor;
     }
@@ -78,7 +116,7 @@ export default class NFT {
     return [items, nextCursor];
   }
 
-  public async listActivities(id: string, size: number = 30, cursor?: string): Promise<ListActivitiesResponse> {
+  public async listActivitiesByCollection(id: string, size: number = 30, cursor?: string): Promise<ListActivitiesResponse> {
     const [trans, nextCursor] = await this.solFrenAPI.listTradesByCollection(id, size, cursor);
 
     // TODO: handle `followed`
@@ -88,14 +126,46 @@ export default class NFT {
         id: transaction.signature,
         price: transaction.price,
         item: {
-          id: transaction.nftInfo.mintAddress,
+          mintAddress: transaction.nftInfo.mintAddress,
           name: transaction.nftInfo.name,
           image: transaction.nftInfo.uriMetadata.image ?? "",
           categories: transaction.nftInfo.collectionInfo?.categories,
+          description: transaction.nftInfo.uriMetadata.description || "",
           owner: null,
+          metaplexMetadata: {
+            name: transaction.nftInfo.name,
+            symbol: transaction.nftInfo.symbol,
+            primarySaleHappened: transaction.nftInfo.primarySaleHappened,
+            sellerFeeBasisPoints: transaction.nftInfo.sellerFeeBasisPoints,
+            isMutable: transaction.nftInfo.isMutable,
+            tokenStandard: transaction.nftInfo.tokenStandard?.toString(),
+            // `uses` no use case so far, bypass type conversion,
+            // uses: transaction.nftInfo.uses,
+            // `collection` should be replaced by collectionInfo.
+            // collection: transaction.nftInfo.collection,
+            creators: transaction.nftInfo.creators!.map((creator) => {
+              return {
+                address: creator.address.toString(),
+                verified: creator.verified,
+                share: creator.share
+              }
+            })
+          },
+          externalMetadata: {
+            description: transaction.nftInfo.uriMetadata.description,
+            externalUrl: transaction.nftInfo.uriMetadata.external_url,
+            // animationUrl: transaction.nftInfo.uriMetadata., => not support yet.
+            collection: transaction.nftInfo.uriMetadata.collection,
+            attributes: transaction.nftInfo.uriMetadata.attributes?.map((attribute) => {
+              return {
+                traitType: attribute.trait_type,
+                value: attribute.value
+              }
+            })
+          }
         },
-        buyer: { id: transaction.targetAddress ?? "" },
-        seller: { id: transaction.ownerAddress },
+        buyer: { address: transaction.targetAddress ?? "" },
+        seller: { address: transaction.ownerAddress },
         timestamp: transaction.timestamp,
       })),
       cursor: nextCursor,
@@ -109,35 +179,59 @@ export default class NFT {
    * @param cursor
    * @returns [nfts, nextCursor]
    */
-  public async listByWallet(walletAddress: string, size: number = 30, cursor?: string): Promise<[ItemResource[], string]> {
+  public async listByWallet(walletAddress: string, size: number = 30, cursor?: string): Promise<[NFTItem[], string]> {
     const nfts = await this.wonkaAPI.nftsByWallet(walletAddress, size, cursor);
-    const items: ItemResource[] = [];
+    const items: NFTItem[] = [];
     let nextCursor: string = '';
     for (const nft of nfts) {
+      let uses: MetaplexMetadataNFTUses | undefined;
+      if(nft.node.metaplex_metadata.uses){
+        uses = {
+          useMethod: nft.node.metaplex_metadata.uses.use_method,
+          remaining: nft.node.metaplex_metadata.uses.remaining,
+          total: nft.node.metaplex_metadata.uses.total
+        }
+      }
+      const attributes: ExternalMetadataAttribute[] = nft.node.external_metadata?.attributes?.map((attr) => {
+        return {
+          traitType: attr.trait_type,
+          value: attr.value,
+          displayType: attr.display_type
+        } as ExternalMetadataAttribute
+      }) || Array()
       items.push({
-        id: nft.node.id,
-        name: nft.node.name,
-        image: nft.node.image.orig,
+        mintAddress: nft.node.metaplex_metadata.mint,
+        name: nft.node.metaplex_metadata.name || nft.node.name,
+        image: nft.node.image?.orig,
+        description: nft.node.external_metadata?.description || "",
+        owner: {
+          address: nft.node.owner?.address || nft.node.token_account.owner,
+          solanaDomain: nft.node.owner?.sol_domain,
+          twitterHandle: nft.node.owner?.twitter_handle
+        },
+        metaplexMetadata: {
+          name: nft.node.metaplex_metadata.name,
+          symbol: nft.node.metaplex_metadata.symbol,
+          primarySaleHappened: nft.node.metaplex_metadata.primary_sale_happened,
+          sellerFeeBasisPoints: nft.node.metaplex_metadata.seller_fee_basis_points,
+          isMutable: nft.node.metaplex_metadata.is_mutable,
+          tokenStandard: nft.node.metaplex_metadata.token_standard,
+          uses: uses,
+          collection: nft.node.metaplex_metadata.collection,
+          creators: nft.node.metaplex_metadata.creators
+        },
+        externalMetadata: {
+          description: nft.node.external_metadata?.description,
+          externalUrl: nft.node.external_metadata?.externalUrl,
+          animationUrl: nft.node.external_metadata?.animationUrl,
+          collection: nft.node.external_metadata?.collection,
+          attributes: attributes
+        }
       });
       nextCursor = nft.cursor;
     }
 
     return [items, nextCursor];
-  }
-
-  // getOwner returns owner of nft,
-  // refer to https://solanacookbook.com/references/nfts.html#how-to-get-the-owner-of-an-nft.
-  private async getOwner(mintAddress: string): Promise<ItemOwnerResource | null> {
-    try {
-      const tokenLargestAccounts = await this.solanaConn.getTokenLargestAccounts(new PublicKey(mintAddress));
-      const parsedAccountInfo = await this.solanaConn.getParsedAccountInfo(tokenLargestAccounts.value[0].address);
-      return {
-        id: (parsedAccountInfo.value?.data as ParsedAccountData).parsed.info.owner,
-      };
-    } catch (err) {
-      // TODO: handle err
-      return null;
-    }
   }
 
   public async likeCollection(provider: any, collectionId: string) {
