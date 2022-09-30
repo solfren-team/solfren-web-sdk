@@ -151,6 +151,12 @@ export default class SolFrenAPI {
   }
 
   public async createCollectionComment(id: string, author: string, content: string): Promise<CollectionComment> {
+    const resp = await this.client.search({
+      index: this.INDEX_COLLECTION,
+      size: 1
+    });
+    console.log(resp.hits.hits);
+
     const comment: CollectionComment = {
       author,
       content,
@@ -167,5 +173,24 @@ export default class SolFrenAPI {
     });
 
     return comment;
+  }
+
+  public async listCollectionComments(id: string, size: number = 30): Promise<CollectionComment[]> {
+    const resp = await this.client.get<CollectionComment[]>({
+      index: this.INDEX_COLLECTION,
+      id,
+      _source: ['comments'],
+    }).catch(err => {
+      if (
+        err instanceof errors.ResponseError &&
+        (err as errors.ResponseError).statusCode == 404
+      ) {
+        return null;
+      } else {
+        throw err;
+      }
+    });
+
+    return resp?._source ?? [];
   }
 }
