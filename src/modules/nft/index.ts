@@ -116,8 +116,8 @@ export default class NFT {
     return [items, nextCursor];
   }
 
-  public async listActivitiesByCollection(id: string, size: number = 30, cursor?: string): Promise<ListActivitiesResponse> {
-    const [trans, nextCursor] = await this.solFrenAPI.listTradesByCollection(id, size, cursor);
+  public async listActivitiesByCollection(id: string, size: number = 30): Promise<ListActivitiesResponse> {
+    const trans = await this.solFrenAPI.listTradesByCollection(id, size);
 
     // TODO: handle `followed`
 
@@ -168,7 +168,6 @@ export default class NFT {
         seller: { address: transaction.ownerAddress },
         timestamp: transaction.timestamp,
       })),
-      cursor: nextCursor,
     }
   }
 
