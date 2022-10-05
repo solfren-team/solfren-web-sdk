@@ -1,4 +1,4 @@
-import { Client } from '@elastic/elasticsearch';
+import { Client, errors } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import { TopDiversityItem, TopTradingFreqItem, TopVolumeItem, WalletInfo } from './types';
 
@@ -25,23 +25,27 @@ export default class SolFrenWallet {
 
       return resp._source as WalletInfo;
     } catch (err: any) {
-      // try to fill up wallet info
-      console.log("failed to getWallet addr:[$s]", walletAddress, err);
-      await this.createWallet(walletAddress);
+      if (err instanceof errors.ResponseError && (err as errors.ResponseError).statusCode == 404) {
+        // try to fill up wallet info
+        console.log("failed to getWallet addr:[%s]", walletAddress, err);
+        await this.createWallet(walletAddress);
 
-      return {
-        walletAddress,
-        name: '',
-        followering: [],
-        twitterHandle: '',
-      } as WalletInfo;
+        return {
+          walletAddress,
+          name: '',
+          followering: [],
+          twitterHandle: '',
+        } as WalletInfo;
+      }
+
+      throw new Error(`failed to getWallet: ${err}`);
     }
   }
 
   public async getWallets(walletAddresses: string[]): Promise<Map<string, WalletInfo>> {
     const walletInfos = new Map<string, WalletInfo>();
     // bypass empty query
-    if(walletAddresses.length == 0) {
+    if (walletAddresses.length == 0) {
       return walletInfos;
     }
     const resp = await this.client.mget<WalletInfo>({

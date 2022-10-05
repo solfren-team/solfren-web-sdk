@@ -16,7 +16,7 @@ const magicEden: API = {
         volumeAll: stats.volumeAll,
       };
     } catch (err) {
-      // TODO: log
+      console.error(`failed to getStats: ${err}`);
       return null
     }
   },
