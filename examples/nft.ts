@@ -47,4 +47,10 @@ import NFT from '../src/modules/nft';
       console.log(resp.collections);
     }
   }
+
+  {
+    const id = 'HpADAcJVfqtDjGjKTcGEs7gMSdjfjYAdtMH3UL8KNkmX';
+    const resp = await nft.createCollectionComment(id, 'test-author-address', 'test-content');
+    console.log(resp);
+  }
 })()

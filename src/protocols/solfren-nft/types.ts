@@ -107,3 +107,10 @@ export interface PIT {
   id: string
   expiredAt: moment.Moment;
 }
+
+export interface CollectionComment {
+  id: string;
+  author: string;
+  content: string;
+  createdAt: Date;
+}

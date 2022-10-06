@@ -112,3 +112,10 @@ export interface ListCollectionsResponse {
   collections: CollectionItem[];
   hasNextPage: boolean;
 }
+
+export interface CommentItem {
+  id: string;
+  content: string;
+  createdAt: Date;
+  owner: OwnerInfo;
+}

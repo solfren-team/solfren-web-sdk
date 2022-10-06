@@ -1,7 +1,8 @@
 import { Client, errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SolNFTTransaction, CollectionInfo, SolNFTTransSale, TransactionType, ListCollectionsCursor, ListCollectionsResponse, PIT } from './types';
+import { SolNFTTransaction, CollectionInfo, SolNFTTransSale, TransactionType, ListCollectionsCursor, ListCollectionsResponse, PIT, CollectionComment } from './types';
 import moment from 'moment';
+import { uuid } from 'uuidv4';
 
 export default class SolFrenAPI {
   private client: Client;
@@ -171,6 +172,32 @@ export default class SolFrenAPI {
       collections,
       cursor: nextCursor,
     };
+  }
+
+  public async createCollectionComment(id: string, author: string, content: string): Promise<CollectionComment> {
+    const comment: CollectionComment = {
+      id: uuid(),
+      author,
+      content,
+      createdAt: moment().toDate(),
+    }
+
+    await this.client.update({
+      index: this.INDEX_COLLECTION,
+      id,
+      script: {
+        source: `
+        if (ctx._source.containsKey('comments')) {
+          ctx._source.comments.add(params.comment)
+        } else {
+          ctx._source.comments = [params.comment]
+        }
+        `,
+        params: { comment },
+      },
+    });
+
+    return comment;
   }
 
   private async acquirePIT(index: string): Promise<PIT> {
