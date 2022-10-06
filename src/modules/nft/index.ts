@@ -2,14 +2,14 @@ import assert from 'assert';
 import SolFrenAPI from "../../protocols/solfren-nft";
 import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
-import { CollectionItem, NFTItem, OwnerInfo, ListActivitiesResponse, MetaplexMetadataNFTUses, ExternalMetadataAttribute } from "./types";
+import { CollectionItem, NFTItem, OwnerInfo, ListActivitiesResponse, MetaplexMetadataNFTUses, ExternalMetadataAttribute, ListCollectionsResponse } from "./types";
 import { Config } from '../../types';
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 import WonkaAPI from '../../protocols/wonka';
 import { NftEdge } from '../../protocols/wonka/types';
 import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
 import { ConnectionType } from '@cyberlab/cyberconnect';
-import { SolNFTTransSale } from "../../protocols/solfren-nft/types";
+import { SolNFTTransSale, CollectionInfo } from "../../protocols/solfren-nft/types";
 
 export default class NFT {
   private solFrenAPI: SolFrenAPI;
@@ -65,7 +65,7 @@ export default class NFT {
     let nextCursor: string = '';
     for (const nft of nfts) {
       let uses: MetaplexMetadataNFTUses | undefined;
-      if(nft.node.metaplex_metadata.uses){
+      if (nft.node.metaplex_metadata.uses) {
         uses = {
           useMethod: nft.node.metaplex_metadata.uses.use_method,
           remaining: nft.node.metaplex_metadata.uses.remaining,
@@ -185,7 +185,7 @@ export default class NFT {
     let nextCursor: string = '';
     for (const nft of nfts) {
       let uses: MetaplexMetadataNFTUses | undefined;
-      if(nft.node.metaplex_metadata.uses){
+      if (nft.node.metaplex_metadata.uses) {
         uses = {
           useMethod: nft.node.metaplex_metadata.uses.use_method,
           remaining: nft.node.metaplex_metadata.uses.remaining,
@@ -232,6 +232,39 @@ export default class NFT {
     }
 
     return [items, nextCursor];
+  }
+
+  public async listCollections(size: number = 30, cursor?: CollectionItem): Promise<ListCollectionsResponse> {
+    const resp = await this.solFrenAPI.listCollections(size, (cursor && { '@timestamp': cursor?.createdAt, collectionId: cursor.id }));
+
+    const collections: CollectionItem[] = [];
+    for (let i = 0; i < resp.collections.length; i++) {
+      const item: CollectionInfo = resp.collections[i];
+
+      let stats: CollectionStats | null = null;
+      if (item.marketplace && this.marketplaces[item.marketplace.name]) {
+        stats = await this.marketplaces[item.marketplace.name].getStats(item.marketplace.id);
+      }
+
+      collections.push({
+        id: item.collectionId,
+        name: item.name,
+        symbol: item.symbol,
+        description: item.description ?? '',
+        image: item.image ?? '',
+        website: item.website,
+        twitter: item.twitter,
+        discord: item.discord,
+        categories: item.categories,
+        createdAt: item['@timestamp'],
+        ...(stats && { stats }),
+      });
+    }
+
+    return {
+      collections,
+      hasNextPage: collections.length == size,
+    }
   }
 
   public async likeCollection(provider: any, collectionId: string) {

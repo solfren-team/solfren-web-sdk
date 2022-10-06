@@ -1,5 +1,6 @@
 import { JsonMetadata, Creator } from "@metaplex-foundation/js";
 import { Collection, TokenStandard, Uses } from "@metaplex-foundation/mpl-token-metadata";
+import moment from 'moment';
 
 export interface NFTInfo {
   metadataAddress: string;
@@ -39,6 +40,7 @@ export interface CollectionInfo {
   totalItems?: number;
   parentCollectionId?: string; // prepare for nested collections (metaplex v1.3)
   marketplace?: MarketplaceInfo;
+  '@timestamp': Date;
 }
 
 export interface MarketplaceInfo {
@@ -89,4 +91,19 @@ export interface SolNFTTransSale extends SolNFTTransaction {
 
 export interface SolNFTTransOwnerPost extends SolNFTTransaction {
   message: string;
+}
+
+export interface ListCollectionsCursor {
+  '@timestamp': Date;
+  collectionId: string;
+}
+
+export interface ListCollectionsResponse {
+  collections: CollectionInfo[];
+  cursor?: ListCollectionsCursor
+}
+
+export interface PIT {
+  id: string
+  expiredAt: moment.Moment;
 }

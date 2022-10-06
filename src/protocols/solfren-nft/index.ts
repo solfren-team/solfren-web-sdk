@@ -1,13 +1,15 @@
 import { Client, errors } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SolNFTTransaction, CollectionInfo, SolNFTTransSale, TransactionType } from './types';
+import { SolNFTTransaction, CollectionInfo, SolNFTTransSale, TransactionType, ListCollectionsCursor, ListCollectionsResponse, PIT } from './types';
+import moment from 'moment';
 
 export default class SolFrenAPI {
   private client: Client;
+  private pits: Map<string, PIT>;
 
   private INDEX_COLLECTION = 'sol-collections';
   private INDEX_NFT_TRANS = 'sol-nft-trans';
-  private PIT_KEEP_ALIVE = '1m';
+  private PIT_KEEP_ALIVE = 1;
 
   public constructor(apiKey: String) {
     //TODO: don't access ES from SDK directly, use solfren-api instead.
@@ -17,6 +19,7 @@ export default class SolFrenAPI {
         apiKey: `${apiKey}`
       }
     });
+    this.pits = new Map<string, PIT>();
   }
 
   public async getNFTTransactions(from: number = 0, size: number = 20, filterByAddresses: string[], hasCollection?: boolean): Promise<SolNFTTransaction[]> {
@@ -116,7 +119,7 @@ export default class SolFrenAPI {
     if (!cursor) {
       const pit = await this.client.openPointInTime({
         index: this.INDEX_NFT_TRANS,
-        keep_alive: this.PIT_KEEP_ALIVE,
+        keep_alive: `${this.PIT_KEEP_ALIVE}m`,
       });
       cursor = pit.id
     }
@@ -125,7 +128,7 @@ export default class SolFrenAPI {
       size,
       pit: {
         id: cursor,
-        keep_alive: this.PIT_KEEP_ALIVE,
+        keep_alive: `${this.PIT_KEEP_ALIVE}m`,
       },
       body: {
         query: {
@@ -148,5 +151,55 @@ export default class SolFrenAPI {
     });
 
     return [resp.hits.hits.map(hit => hit._source!), resp.pit_id ?? ""];
+  }
+
+  public async listCollections(size: number = 30, cursor?: ListCollectionsCursor): Promise<ListCollectionsResponse> {
+    const pit = await this.acquirePIT(this.INDEX_COLLECTION);
+    const resp = await this.client.search<CollectionInfo>({
+      size,
+      pit: {
+        id: pit.id,
+        keep_alive: `${this.PIT_KEEP_ALIVE}m`,
+      },
+      body: {
+        sort: [
+          { '@timestamp': 'desc' },
+          { 'collectionId': 'desc' },
+        ],
+        ...(cursor && { search_after: [(new Date(cursor['@timestamp'])).getTime(), cursor.collectionId] }),
+      }
+    });
+
+    const collections = resp.hits.hits.map(hit => hit._source!);
+
+    let nextCursor;
+    if (collections.length == size) {
+      nextCursor = collections[collections.length - 1];
+    }
+
+    return {
+      collections,
+      cursor: nextCursor,
+    };
+  }
+
+  private async acquirePIT(index: string): Promise<PIT> {
+    const pit = this.pits.get(index);
+    if (pit && moment().isBefore(pit.expiredAt)) {
+      return pit;
+    }
+
+    const esPIT = await this.client.openPointInTime({
+      index: this.INDEX_COLLECTION,
+      keep_alive: `${this.PIT_KEEP_ALIVE}m`,
+    });
+
+    // TODO: mutex
+    this.pits[index] = esPIT.id;
+
+    return {
+      id: esPIT.id,
+      expiredAt: moment().add(this.PIT_KEEP_ALIVE, 'm'),
+    }
   }
 }

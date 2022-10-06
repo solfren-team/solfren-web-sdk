@@ -37,4 +37,15 @@ import NFT from '../src/modules/nft';
     console.log(nfts);
     console.log(cursor);
   }
+
+  {
+    let cursor;
+    for (let i = 0; i < 2; i++) {
+      const resp = await nft.listCollections(1, cursor);
+      if (resp.hasNextPage) {
+        cursor = resp.collections[resp.collections.length - 1]
+      }
+      console.log(resp.collections);
+    }
+  }
 })()

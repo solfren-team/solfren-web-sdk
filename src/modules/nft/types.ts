@@ -108,3 +108,8 @@ export interface ListActivitiesResponse {
   activities: ActivityItem[];
   cursor: string;
 }
+
+export interface ListCollectionsResponse {
+  collections: CollectionItem[];
+  hasNextPage: boolean;
+}
