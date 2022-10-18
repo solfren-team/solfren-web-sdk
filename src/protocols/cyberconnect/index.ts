@@ -1,5 +1,5 @@
 import { GraphQLClient, gql } from 'graphql-request'
-import { FollowingCount, Identity } from './types';
+import { Identity } from './types';
 
 export default class CyberConnect {
   private client: GraphQLClient;
@@ -38,7 +38,7 @@ export default class CyberConnect {
       .request<{ identity: Identity }>(query, variables)
       .then((res) => res.identity)
       .catch((err) => {
-        console.error('failed to identity', err);
+        console.error('failed to getIdentity addr:[%s]', walletAddress, err);
         return null;
       });
   }

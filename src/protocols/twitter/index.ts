@@ -12,6 +12,7 @@ export default class TwitterAPI {
     const username = twitterHandle.startsWith('@') ? twitterHandle.substring(1) : twitterHandle;
     const { data } = await this.client.users.findUserByUsername(username);
     if (!data) {
+      console.error('failed to findUserByUsername twitter:[%s]', twitterHandle);
       return undefined;
     }
 

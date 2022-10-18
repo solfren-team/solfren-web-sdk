@@ -95,14 +95,11 @@ export default class SolFrenAPI {
     const resp = await this.client.get<CollectionInfo>({
       index: this.INDEX_COLLECTION,
       id,
-    }).catch(ex => {
-      if (
-        ex instanceof errors.ResponseError &&
-        (ex as errors.ResponseError).statusCode == 404
-      ) {
+    }).catch(err => {
+      if (err instanceof errors.ResponseError && (err as errors.ResponseError).statusCode == 404) {
         return null;
       } else {
-        throw ex;
+        throw new Error(`failed to getCollection: ${err}`);
       }
     });
     return resp?._source!;
