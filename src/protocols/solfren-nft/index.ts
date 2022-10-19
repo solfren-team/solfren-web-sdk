@@ -106,25 +106,18 @@ export default class SolFrenAPI {
   }
 
   /**
-   * listTradesByCollection returns nft transactions and cursor.
+   * listTradesByCollection returns nft transactions.
    * @param id
    * @param size
    * @param cursor
-   * @returns [transactions, nextCursor]
+   * @returns transactions
    */
-  public async listTradesByCollection(id: string, size: number = 30, cursor?: string): Promise<[SolNFTTransSale[], string]> {
-    if (!cursor) {
-      const pit = await this.client.openPointInTime({
-        index: this.INDEX_NFT_TRANS,
-        keep_alive: `${this.PIT_KEEP_ALIVE}m`,
-      });
-      cursor = pit.id
-    }
-
+  public async listTradesByCollection(id: string, size: number = 30): Promise<SolNFTTransSale[]> {
+    const pit = await this.acquirePIT(this.INDEX_NFT_TRANS);
     const resp = await this.client.search<SolNFTTransSale>({
       size,
       pit: {
-        id: cursor,
+        id: pit.id,
         keep_alive: `${this.PIT_KEEP_ALIVE}m`,
       },
       body: {
@@ -143,11 +136,11 @@ export default class SolFrenAPI {
               }
             ],
           }
-        }
-      }
+        },
+      },
     });
 
-    return [resp.hits.hits.map(hit => hit._source!), resp.pit_id ?? ""];
+    return resp.hits.hits.map(hit => hit._source!);
   }
 
   public async listCollections(size: number = 30, cursor?: ListCollectionsCursor): Promise<ListCollectionsResponse> {

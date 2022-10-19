@@ -106,7 +106,6 @@ export interface ActivityItem {
 
 export interface ListActivitiesResponse {
   activities: ActivityItem[];
-  cursor: string;
 }
 
 export interface ListCollectionsResponse {
