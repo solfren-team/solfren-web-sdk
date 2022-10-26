@@ -195,23 +195,15 @@ export default class Profile {
   }
 
   public async listFollowers(walletAddress: string, size: number = 30, cursor: string = ''): Promise<ListFollowersResponse> {
-    const followers = await this.cyberConnect.listFollowers(walletAddress, size, cursor);
-    const res: ListFollowersResponse = { followers: followers.list };
-
-    if (followers.pageInfo.hasNextPage) {
-      res.cursor = followers.pageInfo.endCursor;
-    }
+    const followers = await this.solFrenFollow.listFollowers(walletAddress, 'Wallet');
+    const res: ListFollowersResponse = { followers };
 
     return res;
   }
 
   public async listFollowings(walletAddress: string, size: number = 30, cursor: string = ''): Promise<ListFollowingsResponse> {
-    const followings = await this.cyberConnect.listFollowings(walletAddress, size, cursor);
-    const res: ListFollowingsResponse = { followings: followings.list };
-
-    if (followings.pageInfo.hasNextPage) {
-      res.cursor = followings.pageInfo.endCursor;
-    }
+    const followings = await this.solFrenFollow.listFollowings(walletAddress, 'Wallet');
+    const res: ListFollowingsResponse = { followings: followings };
 
     return res;
   }

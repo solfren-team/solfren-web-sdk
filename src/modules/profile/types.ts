@@ -1,4 +1,5 @@
-import { Github, List } from "../../protocols/cyberconnect/types"
+import { Github } from "../../protocols/cyberconnect/types"
+import { Follow } from "../../protocols/solfren-follow/types"
 
 export interface ProfileItem {
   wallet: Wallet
@@ -47,11 +48,11 @@ export interface Statistics {
 }
 
 export interface ListFollowersResponse {
-  followers: List[];
+  followers: Follow[];
   cursor?: string;
 }
 
 export interface ListFollowingsResponse {
-  followings: List[];
+  followings: Follow[];
   cursor?: string;
 }
