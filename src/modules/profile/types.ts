@@ -1,4 +1,4 @@
-import { Github } from "../../protocols/cyberconnect/types"
+import { Github, List } from "../../protocols/cyberconnect/types"
 
 export interface ProfileItem {
   wallet: Wallet
@@ -44,4 +44,14 @@ export interface Statistics {
   collectionCount?: number
   nftCount?: number
   trade30DaysCount?: number
+}
+
+export interface ListFollowersResponse {
+  followers: List[];
+  cursor?: string;
+}
+
+export interface ListFollowingsResponse {
+  followings: List[];
+  cursor?: string;
 }

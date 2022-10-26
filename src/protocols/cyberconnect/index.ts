@@ -1,5 +1,5 @@
 import { GraphQLClient, gql } from 'graphql-request'
-import { Identity } from './types';
+import { Followers, Followings, Identity } from './types';
 
 export default class CyberConnect {
   private client: GraphQLClient;
@@ -41,5 +41,69 @@ export default class CyberConnect {
         console.error('failed to getIdentity addr:[%s]', walletAddress, err);
         return null;
       });
+  }
+
+  public async listFollowers(walletAddress: string, limit: number = 30, cursor: string = ''): Promise<Followers> {
+    const query = gql`
+      query FullIdentityQuery($address: String!) {
+        identity(address: $address, network: SOLANA) {
+          followers(first: ${limit}, after: "${cursor}") {
+            pageInfo {
+              startCursor
+              endCursor
+              hasNextPage
+              hasPreviousPage
+            }
+            list {
+              address
+              domain
+              avatar
+              namespace
+              lastModifiedTime
+            }
+          }
+        }
+      }
+    `;
+    const variables = {
+      address: walletAddress,
+    };
+
+    return this.client
+      .request<{ identity: Identity }>(query, variables)
+      .then((res) => res.identity.followers);
+  }
+
+  public async listFollowings(walletAddress: string, limit: number = 30, cursor: string = ''): Promise<Followings> {
+    const query = gql`
+      query FullIdentityQuery($address: String!) {
+        identity(address: $address, network: SOLANA) {
+          followings(first: ${limit}, after: "${cursor}") {
+            pageInfo {
+              startCursor
+              endCursor
+              hasNextPage
+              hasPreviousPage
+            }
+            list {
+              address
+              domain
+              avatar
+              namespace
+              lastModifiedTime
+            }
+          }
+        }
+      }
+    `;
+    const variables = {
+      address: walletAddress,
+      first: limit,
+      after: cursor,
+    };
+
+    return this.client
+      .request<{ identity: Identity }>(query, variables)
+      .then((res) => res.identity.followings);
   }
 }

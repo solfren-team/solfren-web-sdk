@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { Config } from '../../types';
-import { ProfileItem, Twitter, Wallet } from './types';
+import { ListFollowersResponse, ListFollowingsResponse, ProfileItem, Twitter, Wallet } from './types';
 import CyberConnect from '../../protocols/cyberconnect';
 import SolFrenWallet from '../../protocols/solfren-wallet';
 import { WalletInfo } from '../../protocols/solfren-wallet/types';
@@ -9,7 +9,6 @@ import WonkaAPI from '../../protocols/wonka';
 import { ConnectionType } from '@cyberlab/cyberconnect';
 import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
 import { PublicKey } from '@solana/web3.js';
-import { getConstantValue } from 'typescript';
 
 export default class Profile {
   private solFrenWallet: SolFrenWallet;
@@ -103,7 +102,7 @@ export default class Profile {
 
     const walletsMap = await this.solFrenWallet.getWallets(walletAddresses);
     console.debug("listWallets got size:[%s]", walletsMap.size, walletsMap.keys);
-    for(let k of walletsMap.keys()) {
+    for (let k of walletsMap.keys()) {
       const v = walletsMap.get(k)!;
       console.debug("k:[$s] v:[$s]", k, v);
       let twitter: Twitter | undefined;
@@ -130,8 +129,8 @@ export default class Profile {
         name: string;
         imageUrl: string;
       } | undefined
-      let selectedAvatarNFT : SelectedAvatarNFT = undefined
-      if(v.selectedAvatarNFT) {
+      let selectedAvatarNFT: SelectedAvatarNFT = undefined
+      if (v.selectedAvatarNFT) {
         selectedAvatarNFT = {
           name: v.selectedAvatarNFT!.name,
           imageUrl: v.selectedAvatarNFT!.image_url,
@@ -148,11 +147,11 @@ export default class Profile {
         selectedAvatarNFT: selectedAvatarNFT,
         followerCount: cyberConnectIdentity?.followerCount || 0,
         followingCount: cyberConnectIdentity?.followingCount || 0,
-        github: cyberConnectIdentity?.github,        
+        github: cyberConnectIdentity?.github,
       })
     }
 
-    return wallets;    
+    return wallets;
   }
 
   private async syncWithBonfida(walletInfo: WalletInfo): Promise<WalletInfo> {
@@ -187,5 +186,27 @@ export default class Profile {
 
   public async unfollow(provider: any, walletAddress: string) {
     await getCyberConnectSDK(provider).disconnect(walletAddress);
+  }
+
+  public async listFollowers(walletAddress: string, size: number = 30, cursor: string = ''): Promise<ListFollowersResponse> {
+    const followers = await this.cyberConnect.listFollowers(walletAddress, size, cursor);
+    const res: ListFollowersResponse = { followers: followers.list };
+
+    if (followers.pageInfo.hasNextPage) {
+      res.cursor = followers.pageInfo.endCursor;
+    }
+
+    return res;
+  }
+
+  public async listFollowings(walletAddress: string, size: number = 30, cursor: string = ''): Promise<ListFollowingsResponse> {
+    const followings = await this.cyberConnect.listFollowings(walletAddress, size, cursor);
+    const res: ListFollowingsResponse = { followings: followings.list };
+
+    if (followings.pageInfo.hasNextPage) {
+      res.cursor = followings.pageInfo.endCursor;
+    }
+
+    return res;
   }
 }

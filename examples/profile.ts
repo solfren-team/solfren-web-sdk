@@ -15,6 +15,20 @@ import Profile from '../src/modules/profile';
       endpoint: 'https://api.cybertino.io/connect/',
     },
   });
-  const profileResp = await profile.get('2NoEcR9cC7Rn6bP9rBpky6B1eP9syyPf8FXRaf1myChv');
-  console.log('profile', profileResp);
+  const walletAddress = '2NoEcR9cC7Rn6bP9rBpky6B1eP9syyPf8FXRaf1myChv';
+
+  {
+    const profileResp = await profile.get(walletAddress);
+    console.log('profile', profileResp);
+  }
+
+  {
+    const resp = await profile.listFollowers(walletAddress, 2);
+    console.log('followers', resp);
+  }
+
+  {
+    const resp = await profile.listFollowings(walletAddress, 2);
+    console.log('followings', resp);
+  }
 })()
