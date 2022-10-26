@@ -1,4 +1,3 @@
-import { Github } from "../../protocols/cyberconnect/types"
 import { Follow } from "../../protocols/solfren-follow/types"
 
 export interface ProfileItem {
@@ -12,7 +11,7 @@ export interface Wallet {
   description?: string
   twitterHandle?: string
   twitter?: Twitter
-  github?: Github
+  github: undefined // deprecated
   solanaDomain?: string
   achievements?: Array<string>
   selectedAvatarNFT?: {

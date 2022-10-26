@@ -1,7 +1,6 @@
 import assert from 'assert';
 import { Config } from '../../types';
 import { ListFollowersResponse, ListFollowingsResponse, ProfileItem, Twitter, Wallet } from './types';
-import CyberConnect from '../../protocols/cyberconnect';
 import SolFrenWallet from '../../protocols/solfren-wallet';
 import { WalletInfo } from '../../protocols/solfren-wallet/types';
 import TwitterAPI from '../../protocols/twitter';
@@ -14,7 +13,6 @@ export default class Profile {
   private solFrenWallet: SolFrenWallet;
   private wonkaAPI: WonkaAPI;
   private twitterAPI: TwitterAPI;
-  private cyberConnect: CyberConnect;
 
   public constructor(config: Config) {
     assert(config?.solFrenAPI?.apiKey);
@@ -23,13 +21,11 @@ export default class Profile {
     assert(config?.solFrenAPI?.follow.password);
     assert(config?.wonkaAPI?.endpoint);
     assert(config?.twitter?.apiKey);
-    assert(config?.cyberConnect?.endpoint);
 
     this.solFrenFollow = new SolFrenFollow(config.solFrenAPI.follow.endpoint, config.solFrenAPI.follow.username, config.solFrenAPI.follow.password);
     this.solFrenWallet = new SolFrenWallet(config.solFrenAPI.apiKey);
     this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
     this.twitterAPI = new TwitterAPI(config.twitter.apiKey);
-    this.cyberConnect = new CyberConnect(config.cyberConnect.endpoint)
   }
 
   public async get(walletAddress: string): Promise<ProfileItem> {
@@ -72,8 +68,6 @@ export default class Profile {
       }
     }
 
-    const cyberConnectIdentity = await this.cyberConnect.getIdentity(walletAddress);
-
     return {
       wallet: {
         address: walletAddress,
@@ -87,9 +81,9 @@ export default class Profile {
           name: wallet.selectedAvatarNFT?.name,
           imageUrl: wallet.selectedAvatarNFT?.image_url,
         },
-        followerCount: cyberConnectIdentity?.followerCount,
-        followingCount: cyberConnectIdentity?.followingCount,
-        github: cyberConnectIdentity?.github,
+        followerCount: 0, // TODO implement
+        followingCount: 0, // TODO implement
+        github: undefined, // deprecated
       },
       statistics: {
         volume30DaysSum: topProfile?.sum ?? 0,
@@ -127,7 +121,6 @@ export default class Profile {
           }
         } as Twitter;
       }
-      const cyberConnectIdentity = await this.cyberConnect.getIdentity(k);
 
       type SelectedAvatarNFT = {
         name: string;
@@ -149,9 +142,9 @@ export default class Profile {
         solanaDomain: v.solanaDomain,
         achievements: v.achievements,
         selectedAvatarNFT: selectedAvatarNFT,
-        followerCount: cyberConnectIdentity?.followerCount || 0,
-        followingCount: cyberConnectIdentity?.followingCount || 0,
-        github: cyberConnectIdentity?.github,
+        followerCount: 0, // TODO implement
+        followingCount: 0, // TODO implement
+        github: undefined, // deprecated
       })
     }
 

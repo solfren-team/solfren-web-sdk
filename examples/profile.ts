@@ -16,9 +16,6 @@ import Profile from '../src/modules/profile';
     twitter: {
       apiKey: '{YOUR_TWITTER_API_KEY}',
     },
-    cyberConnect: {
-      endpoint: 'https://api.cybertino.io/connect/',
-    },
   });
   const walletAddress = '2NoEcR9cC7Rn6bP9rBpky6B1eP9syyPf8FXRaf1myChv';
 

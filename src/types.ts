@@ -16,9 +16,6 @@ export interface Config {
   twitter?: {
     apiKey: string
   }
-  cyberConnect?: {
-    endpoint: string
-  }
   simpleHash?: {
     key: string
   }
