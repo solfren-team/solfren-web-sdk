@@ -6,11 +6,11 @@ import SolFrenWallet from '../../protocols/solfren-wallet';
 import { WalletInfo } from '../../protocols/solfren-wallet/types';
 import TwitterAPI from '../../protocols/twitter';
 import WonkaAPI from '../../protocols/wonka';
-import { ConnectionType } from '@cyberlab/cyberconnect';
-import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
 import { PublicKey } from '@solana/web3.js';
+import SolFrenFollow from '../../protocols/solfren-follow';
 
 export default class Profile {
+  private solFrenFollow: SolFrenFollow;
   private solFrenWallet: SolFrenWallet;
   private wonkaAPI: WonkaAPI;
   private twitterAPI: TwitterAPI;
@@ -18,10 +18,14 @@ export default class Profile {
 
   public constructor(config: Config) {
     assert(config?.solFrenAPI?.apiKey);
+    assert(config?.solFrenAPI?.follow.endpoint);
+    assert(config?.solFrenAPI?.follow.username);
+    assert(config?.solFrenAPI?.follow.password);
     assert(config?.wonkaAPI?.endpoint);
     assert(config?.twitter?.apiKey);
     assert(config?.cyberConnect?.endpoint);
 
+    this.solFrenFollow = new SolFrenFollow(config.solFrenAPI.follow.endpoint, config.solFrenAPI.follow.username, config.solFrenAPI.follow.password);
     this.solFrenWallet = new SolFrenWallet(config.solFrenAPI.apiKey);
     this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
     this.twitterAPI = new TwitterAPI(config.twitter.apiKey);
@@ -180,12 +184,14 @@ export default class Profile {
     return walletInfo;
   }
 
-  public async follow(provider: any, walletAddress: string) {
-    await getCyberConnectSDK(provider).connect(walletAddress, undefined, ConnectionType.FOLLOW);
+  public async follow(walletAddress: string, followAddress: string) {
+    await this.solFrenFollow.follow(walletAddress, followAddress, 'Wallet');
+    await this.solFrenFollow.close();
   }
 
-  public async unfollow(provider: any, walletAddress: string) {
-    await getCyberConnectSDK(provider).disconnect(walletAddress);
+  public async unfollow(walletAddress: string, followAddress: string) {
+    await this.solFrenFollow.unfollow(walletAddress, followAddress, 'Wallet');
+    await this.solFrenFollow.close();
   }
 
   public async listFollowers(walletAddress: string, size: number = 30, cursor: string = ''): Promise<ListFollowersResponse> {

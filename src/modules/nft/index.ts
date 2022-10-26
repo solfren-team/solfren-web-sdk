@@ -4,22 +4,28 @@ import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
 import { CollectionItem, NFTItem, ListActivitiesResponse, ListCollectionsResponse, CommentItem } from "./types";
 import { Config } from '../../types';
-import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
-import { ConnectionType } from '@cyberlab/cyberconnect';
 import { SolNFTTransSale, CollectionInfo } from "../../protocols/solfren-nft/types";
 import SimpleHash from '../../protocols/simpleHash';
 import { Nft } from '../../protocols/simpleHash/types';
+import SolFrenFollow from '../../protocols/solfren-follow';
 
 
 export default class NFT {
+  private solFrenFollow: SolFrenFollow;
   private solFrenAPI: SolFrenAPI;
   private marketplaces: Record<string, MarketplaceAPI> = marketplaces;
   private simpleHash: SimpleHash;
 
   public constructor(config: Config) {
     assert(config?.solFrenAPI?.apiKey);
+    assert(config?.solFrenAPI?.follow.endpoint);
+    assert(config?.solFrenAPI?.follow.username);
+    assert(config?.solFrenAPI?.follow.password);
     assert(config.simpleHash?.key);
+    assert(config?.solanaRPC?.endpoint);
+    assert(config?.wonkaAPI?.endpoint);
 
+    this.solFrenFollow = new SolFrenFollow(config.solFrenAPI.follow.endpoint, config.solFrenAPI.follow.username, config.solFrenAPI.follow.password);
     this.solFrenAPI = new SolFrenAPI(config.solFrenAPI.apiKey);
     this.simpleHash = new SimpleHash(config.simpleHash?.key);
   }
@@ -162,20 +168,24 @@ export default class NFT {
     }
   }
 
-  public async likeCollection(provider: any, collectionId: string) {
-    await getCyberConnectSDK(provider).connect(collectionId, undefined, ConnectionType.LIKE);
+  public async likeCollection(walletAddress: string, collectionId: string) {
+    await this.solFrenFollow.follow(walletAddress, collectionId, 'Collection');
+    await this.solFrenFollow.close();
   }
 
-  public async unlikeCollection(provider: any, collectionId: string) {
-    await getCyberConnectSDK(provider).disconnect(collectionId);
+  public async unlikeCollection(walletAddress: string, collectionId: string) {
+    await this.solFrenFollow.unfollow(walletAddress, collectionId, 'Collection');
+    await this.solFrenFollow.close();
   }
 
-  public async likeNFT(provider: any, mintAddress: string) {
-    await getCyberConnectSDK(provider).connect(mintAddress, undefined, ConnectionType.LIKE);
+  public async likeNFT(walletAddress: string, mintAddress: string) {
+    await this.solFrenFollow.follow(walletAddress, mintAddress, 'NFT');
+    await this.solFrenFollow.close();
   }
 
-  public async unlikeNFT(provider: any, mintAddress: string) {
-    await getCyberConnectSDK(provider).disconnect(mintAddress);
+  public async unlikeNFT(walletAddress: string, mintAddress: string) {
+    await this.solFrenFollow.unfollow(walletAddress, mintAddress, 'NFT');
+    await this.solFrenFollow.close();
   }
 
   public async createCollectionComment(id: string, author: string, content: string): Promise<CommentItem> {
