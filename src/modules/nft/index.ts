@@ -2,7 +2,7 @@ import assert from 'assert';
 import SolFrenAPI from "../../protocols/solfren-nft";
 import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
-import { CollectionItem, NFTItem, OwnerInfo, ListActivitiesResponse, MetaplexMetadataNFTUses, ExternalMetadataAttribute, ListCollectionsResponse } from "./types";
+import { CollectionItem, NFTItem, OwnerInfo, ListActivitiesResponse, MetaplexMetadataNFTUses, ExternalMetadataAttribute, ListCollectionsResponse, CommentItem } from "./types";
 import { Config } from '../../types';
 import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
 import WonkaAPI from '../../protocols/wonka';
@@ -280,5 +280,31 @@ export default class NFT {
 
   public async unlikeNFT(provider: any, mintAddress: string) {
     await getCyberConnectSDK(provider).disconnect(mintAddress);
+  }
+
+  public async createCollectionComment(id: string, author: string, content: string): Promise<CommentItem> {
+    const resp = await this.solFrenAPI.createCollectionComment(id, author, content);
+
+    return {
+      id: resp.id,
+      content: resp.content,
+      createdAt: resp.createdAt,
+      owner: {
+        address: author,
+      },
+    }
+  }
+
+  public async listCollectionComments(id: string): Promise<CommentItem[]> {
+    const resp = await this.solFrenAPI.listCollectionComments(id);
+    console.log(JSON.stringify(resp));
+    return resp.map(comment => ({
+      id: comment.id,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      owner: {
+        address: comment.author,
+      }
+    }));
   }
 }
