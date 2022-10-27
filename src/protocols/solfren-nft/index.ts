@@ -200,6 +200,16 @@ export default class SolFrenAPI {
     return comment;
   }
 
+  public async listCollectionComments(id: string): Promise<CollectionComment[]> {
+    const resp = await this.client.get<CollectionComment[]>({
+      index: this.INDEX_COLLECTION,
+      id,
+      _source: ['comments']
+    });
+
+    return resp._source!['comments'] ?? [];
+  }
+
   private async acquirePIT(index: string): Promise<PIT> {
     const pit = this.pits.get(index);
     if (pit && moment().isBefore(pit.expiredAt)) {

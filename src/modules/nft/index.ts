@@ -294,4 +294,17 @@ export default class NFT {
       },
     }
   }
+
+  public async listCollectionComments(id: string): Promise<CommentItem[]> {
+    const resp = await this.solFrenAPI.listCollectionComments(id);
+    console.log(JSON.stringify(resp));
+    return resp.map(comment => ({
+      id: comment.id,
+      content: comment.content,
+      createdAt: comment.createdAt,
+      owner: {
+        address: comment.author,
+      }
+    }));
+  }
 }
