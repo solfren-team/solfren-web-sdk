@@ -155,63 +155,42 @@ export default class NFT {
   /**
    * listByWallet returns NFTs and nextCursor.
    * @param walletAddress
-   * @param size
    * @param cursor
    * @returns [nfts, nextCursor]
    */
-  public async listByWallet(walletAddress: string, size: number = 30, cursor?: string): Promise<[NFTItem[], string]> {
-    const nfts = await this.wonkaAPI.nftsByWallet(walletAddress, size, cursor);
+  public async listByWallet(walletAddress: string, cursor?: string): Promise<[NFTItem[], string]> {
+    const resp = await this.simpleHash.nftsByWallet(walletAddress, cursor);
+
     const items: NFTItem[] = [];
-    let nextCursor: string = '';
-    for (const nft of nfts) {
-      let uses: MetaplexMetadataNFTUses | undefined;
-      if (nft.node.metaplex_metadata.uses) {
-        uses = {
-          useMethod: nft.node.metaplex_metadata.uses.use_method,
-          remaining: nft.node.metaplex_metadata.uses.remaining,
-          total: nft.node.metaplex_metadata.uses.total
-        }
-      }
-      const attributes: ExternalMetadataAttribute[] = nft.node.external_metadata?.attributes?.map((attr) => {
-        return {
-          traitType: attr.trait_type,
-          value: attr.value,
-          displayType: attr.display_type
-        } as ExternalMetadataAttribute
-      }) || Array()
+    for (const nft of resp.nfts) {
       items.push({
-        mintAddress: nft.node.metaplex_metadata.mint,
-        name: nft.node.metaplex_metadata.name || nft.node.name,
-        image: nft.node.image?.orig,
-        description: nft.node.external_metadata?.description || "",
+        mintAddress: nft.contract_address,
+        name: nft.name,
+        image: nft.image_url,
+        description: nft.description,
         owner: {
-          address: nft.node.owner?.address || nft.node.token_account.owner,
-          solanaDomain: nft.node.owner?.sol_domain,
-          twitterHandle: nft.node.owner?.twitter_handle
-        },
-        metaplexMetadata: {
-          name: nft.node.metaplex_metadata.name,
-          symbol: nft.node.metaplex_metadata.symbol,
-          primarySaleHappened: nft.node.metaplex_metadata.primary_sale_happened,
-          sellerFeeBasisPoints: nft.node.metaplex_metadata.seller_fee_basis_points,
-          isMutable: nft.node.metaplex_metadata.is_mutable,
-          tokenStandard: nft.node.metaplex_metadata.token_standard,
-          uses: uses,
-          collection: nft.node.metaplex_metadata.collection,
-          creators: nft.node.metaplex_metadata.creators
+          address: nft.last_sale?.to_address ?? nft.owners[0].owner_address,
         },
         externalMetadata: {
-          description: nft.node.external_metadata?.description,
-          externalUrl: nft.node.external_metadata?.externalUrl,
-          animationUrl: nft.node.external_metadata?.animationUrl,
-          collection: nft.node.external_metadata?.collection,
-          attributes: attributes
-        }
-      });
-      nextCursor = nft.cursor;
+          description: nft.description,
+          externalUrl: nft.external_url,
+          animationUrl: nft.extra_metadata.animation_original_url,
+          collection: {
+            name: nft.collection.name,
+          },
+          attributes: nft.extra_metadata.attributes,
+        },
+        metaplexMetadata: {
+          name: nft.name,
+          symbol: nft.contract.symbol,
+          sellerFeeBasisPoints: nft.extra_metadata.seller_fee_basis_points,
+          isMutable: nft.extra_metadata.is_mutable,
+          creators: nft.extra_metadata.creators,
+        },
+      })
     }
 
-    return [items, nextCursor];
+    return [items, resp.next ?? ''];
   }
 
   public async listCollections(size: number = 30, cursor?: CollectionItem): Promise<ListCollectionsResponse> {
