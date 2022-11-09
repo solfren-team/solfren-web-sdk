@@ -11,6 +11,9 @@ import NFT from '../src/modules/nft';
     wonkaAPI: {
       endpoint: 'https://api.wonkalabs.xyz/v0.1/solana/mainnet/graphql',
     },
+    simpleHash: {
+      key: ''
+    }
   });
 
   const id = 'HhDDF8djnQnty2WJTxsy5VRNMutbPPd5xCtujieHBPAu'; // collection key

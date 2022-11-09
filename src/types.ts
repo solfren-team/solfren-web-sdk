@@ -14,4 +14,7 @@ export interface Config {
   cyberConnect?: {
     endpoint: string
   }
+  simpleHash?: {
+    key: string
+  }
 }
