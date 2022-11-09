@@ -2,32 +2,25 @@ import assert from 'assert';
 import SolFrenAPI from "../../protocols/solfren-nft";
 import marketplaces from "../../protocols/marketplaces";
 import { API as MarketplaceAPI, CollectionStats } from "../../protocols/marketplaces/types";
-import { CollectionItem, NFTItem, OwnerInfo, ListActivitiesResponse, MetaplexMetadataNFTUses, ExternalMetadataAttribute, ListCollectionsResponse, CommentItem } from "./types";
+import { CollectionItem, NFTItem, ListActivitiesResponse, ListCollectionsResponse, CommentItem } from "./types";
 import { Config } from '../../types';
-import { Connection, PublicKey, ParsedAccountData } from '@solana/web3.js';
-import WonkaAPI from '../../protocols/wonka';
-import { NftEdge } from '../../protocols/wonka/types';
 import { getCyberConnectSDK } from '../../utils/cyberConnectSDK';
 import { ConnectionType } from '@cyberlab/cyberconnect';
 import { SolNFTTransSale, CollectionInfo } from "../../protocols/solfren-nft/types";
 import SimpleHash from '../../protocols/simpleHash';
+import { Nft } from '../../protocols/simpleHash/types';
+
 
 export default class NFT {
   private solFrenAPI: SolFrenAPI;
   private marketplaces: Record<string, MarketplaceAPI> = marketplaces;
-  private solanaConn: Connection;
-  private wonkaAPI: WonkaAPI;
   private simpleHash: SimpleHash;
 
   public constructor(config: Config) {
     assert(config?.solFrenAPI?.apiKey);
-    assert(config?.solanaRPC?.endpoint);
-    assert(config?.wonkaAPI?.endpoint);
     assert(config.simpleHash?.key);
 
     this.solFrenAPI = new SolFrenAPI(config.solFrenAPI.apiKey);
-    this.solanaConn = new Connection(config.solanaRPC.endpoint);
-    this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
     this.simpleHash = new SimpleHash(config.simpleHash?.key);
   }
 
@@ -65,36 +58,9 @@ export default class NFT {
   public async listByCollection(id: string, cursor?: string): Promise<[NFTItem[], string]> {
     const resp = await this.simpleHash.nftsByCollection(id, cursor);
 
-    const items: NFTItem[] = [];
-    for (const nft of resp.nfts) {
-      items.push({
-        mintAddress: nft.contract_address,
-        name: nft.name,
-        image: nft.image_url,
-        description: nft.description,
-        owner: {
-          address: nft.last_sale?.to_address ?? nft.owners[0].owner_address,
-        },
-        externalMetadata: {
-          description: nft.description,
-          externalUrl: nft.external_url,
-          collection: {
-            name: nft.collection.name,
-          }
-        },
-        metaplexMetadata: {
-          name: nft.name,
-          symbol: nft.contract.symbol,
-          sellerFeeBasisPoints: nft.extra_metadata.seller_fee_basis_points,
-          isMutable: nft.extra_metadata.is_mutable,
-          creators: nft.extra_metadata.creators,
-        },
-      })
-    }
-
     // TODO: handle `collected`
 
-    return [items, resp.next ?? ''];
+    return [this.formatNftItems(resp.nfts), resp.next ?? ''];
   }
 
   public async listActivitiesByCollection(id: string, size: number = 30): Promise<ListActivitiesResponse> {
@@ -160,37 +126,7 @@ export default class NFT {
    */
   public async listByWallet(walletAddress: string, cursor?: string): Promise<[NFTItem[], string]> {
     const resp = await this.simpleHash.nftsByWallet(walletAddress, cursor);
-
-    const items: NFTItem[] = [];
-    for (const nft of resp.nfts) {
-      items.push({
-        mintAddress: nft.contract_address,
-        name: nft.name,
-        image: nft.image_url,
-        description: nft.description,
-        owner: {
-          address: nft.last_sale?.to_address ?? nft.owners[0].owner_address,
-        },
-        externalMetadata: {
-          description: nft.description,
-          externalUrl: nft.external_url,
-          animationUrl: nft.extra_metadata.animation_original_url,
-          collection: {
-            name: nft.collection.name,
-          },
-          attributes: nft.extra_metadata.attributes,
-        },
-        metaplexMetadata: {
-          name: nft.name,
-          symbol: nft.contract.symbol,
-          sellerFeeBasisPoints: nft.extra_metadata.seller_fee_basis_points,
-          isMutable: nft.extra_metadata.is_mutable,
-          creators: nft.extra_metadata.creators,
-        },
-      })
-    }
-
-    return [items, resp.next ?? ''];
+    return [this.formatNftItems(resp.nfts), resp.next ?? ''];
   }
 
   public async listCollections(size: number = 30, cursor?: CollectionItem): Promise<ListCollectionsResponse> {
@@ -266,5 +202,38 @@ export default class NFT {
         address: comment.author,
       }
     }));
+  }
+
+  private formatNftItems(nfts: Nft[]): NFTItem[] {
+    const items: NFTItem[] = [];
+    for (const nft of nfts) {
+      items.push({
+        mintAddress: nft.contract_address,
+        name: nft.name,
+        image: nft.image_url,
+        description: nft.description,
+        owner: {
+          address: nft.last_sale?.to_address ?? nft.owners[0].owner_address,
+        },
+        externalMetadata: {
+          description: nft.description,
+          externalUrl: nft.external_url,
+          animationUrl: nft.extra_metadata.animation_original_url,
+          collection: {
+            name: nft.collection.name,
+          },
+          attributes: nft.extra_metadata.attributes,
+        },
+        metaplexMetadata: {
+          name: nft.name,
+          symbol: nft.contract.symbol,
+          sellerFeeBasisPoints: nft.extra_metadata.seller_fee_basis_points,
+          isMutable: nft.extra_metadata.is_mutable,
+          creators: nft.extra_metadata.creators,
+        },
+      })
+    }
+
+    return items;
   }
 }
