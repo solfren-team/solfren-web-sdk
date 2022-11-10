@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.5.0](https://github.com/solfren-team/solfren-web-sdk/compare/v0.4.0...v0.5.0) (2022-11-10)
+
+
+### Features
+
+* for release ([b6908e4](https://github.com/solfren-team/solfren-web-sdk/commit/b6908e460a2abff23a0c5df097f02cf3f2a28b52))
+
 ## [0.4.0](https://github.com/solfren-team/solfren-web-sdk/compare/v0.3.3...v0.4.0) (2022-11-10)
 
 
