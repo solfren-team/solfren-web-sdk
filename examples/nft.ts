@@ -53,7 +53,7 @@ import NFT from '../src/modules/nft';
 
   {
     const id = 'HpADAcJVfqtDjGjKTcGEs7gMSdjfjYAdtMH3UL8KNkmX';
-    const resp = await nft.createCollectionComment(id, 'test-author-address', 'test-content');
+    const resp = await nft.createCollectionComment(id, 'test-author-address2', 'test-content');
     console.log(resp);
   }
 
