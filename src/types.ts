@@ -1,6 +1,11 @@
 export interface Config {
   solFrenAPI?: {
     apiKey: string
+    follow: {
+      endpoint: string
+      username: string
+      password: string
+    }
   }
   solanaRPC?: {
     endpoint: string
@@ -10,9 +15,6 @@ export interface Config {
   }
   twitter?: {
     apiKey: string
-  }
-  cyberConnect?: {
-    endpoint: string
   }
   simpleHash?: {
     key: string

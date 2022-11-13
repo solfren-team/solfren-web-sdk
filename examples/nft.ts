@@ -3,7 +3,12 @@ import NFT from '../src/modules/nft';
 (async () => {
   const nft = new NFT({
     solFrenAPI: {
-      apiKey: "X0ZVQ2ZZSUJ1c2ZkYW5GWm1nR1I6Nm00YU1JamZUbGE1dlExekkyZzRWQQ=="
+      apiKey: "X0ZVQ2ZZSUJ1c2ZkYW5GWm1nR1I6Nm00YU1JamZUbGE1dlExekkyZzRWQQ==",
+      follow: {
+        endpoint: 'solfrent-follow-api-endpoint',
+        username: 'the-username',
+        password: 'the-password',
+      },
     },
     solanaRPC: {
       endpoint: 'https://api.mainnet-beta.solana.com'
