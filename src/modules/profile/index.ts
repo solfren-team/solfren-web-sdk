@@ -81,8 +81,8 @@ export default class Profile {
           name: wallet.selectedAvatarNFT?.name,
           imageUrl: wallet.selectedAvatarNFT?.image_url,
         },
-        followerCount: 0, // TODO implement
-        followingCount: 0, // TODO implement
+        followerCount: await this.solFrenFollow.countFollowers(walletAddress, 'Wallet'),
+        followingCount: await this.solFrenFollow.countFollowings(walletAddress, 'Wallet'),
         github: undefined, // deprecated
       },
       statistics: {
@@ -142,8 +142,8 @@ export default class Profile {
         solanaDomain: v.solanaDomain,
         achievements: v.achievements,
         selectedAvatarNFT: selectedAvatarNFT,
-        followerCount: 0, // TODO implement
-        followingCount: 0, // TODO implement
+        followerCount: await this.solFrenFollow.countFollowers(k, 'Wallet'),
+        followingCount: await this.solFrenFollow.countFollowings(k, 'Wallet'),
         github: undefined, // deprecated
       })
     }
