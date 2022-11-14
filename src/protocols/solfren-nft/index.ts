@@ -1,4 +1,4 @@
-import { Client, errors } from '@elastic/elasticsearch';
+import { Client, errors, NodeOptions } from '@elastic/elasticsearch';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SolNFTTransaction, CollectionInfo, SolNFTTransSale, TransactionType, ListCollectionsCursor, ListCollectionsResponse, PIT, CollectionComment } from './types';
 import moment from 'moment';
@@ -12,12 +12,21 @@ export default class SolFrenAPI {
   private INDEX_NFT_TRANS = 'sol-nft-trans';
   private PIT_KEEP_ALIVE = 1;
 
-  public constructor(apiKey: String) {
+  public constructor(apiKey: String, node: string | string[] | NodeOptions | NodeOptions[] = {
+      url: new URL('https://es.solfren.xyz:9200'),
+      ssl: {
+        rejectUnauthorized: false
+      }
+    }
+  ) {
     //TODO: don't access ES from SDK directly, use solfren-api instead.
     this.client = new Client({
-      node: 'http://es.solfren.xyz:9200',
+      node: node,
       auth: {
         apiKey: `${apiKey}`
+      },
+      tls: {
+        rejectUnauthorized: false
       }
     });
     this.pits = new Map<string, PIT>();
