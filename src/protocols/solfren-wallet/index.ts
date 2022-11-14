@@ -1,4 +1,4 @@
-import { Client, errors } from '@elastic/elasticsearch';
+import { Client, errors, NodeOptions } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import { TopDiversityItem, TopTradingFreqItem, TopVolumeItem, WalletInfo } from './types';
 
@@ -6,15 +6,24 @@ export default class SolFrenWallet {
   private client: Client;
   readonly INDEX_WALLET_INFOS = 'fe-wallets';
 
-  public constructor(apiKey: String) {
-    //TODO: don't access ES from SDK directly, use solfren-api instead.
-    this.client = new Client({
-      node: 'http://es.solfren.xyz:9200',
-      auth: {
-        apiKey: `${apiKey}`
+  public constructor(apiKey: String, node: string | string[] | NodeOptions | NodeOptions[] = {
+      url: new URL('https://es.solfren.xyz:9200'),
+      ssl: {
+        rejectUnauthorized: false
       }
-    });
-  }
+    }
+  ) {
+  //TODO: don't access ES from SDK directly, use solfren-api instead.
+  this.client = new Client({
+    node: node,
+    auth: {
+      apiKey: `${apiKey}`
+    },
+    tls: {
+      rejectUnauthorized: false
+    }
+  });
+}
 
   public async getWallet(walletAddress: string): Promise<WalletInfo> {
     try {
