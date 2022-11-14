@@ -1,5 +1,5 @@
 import * as neo4j from 'neo4j-driver';
-import { Follow } from './types';
+import { Follow, FollowType } from './types';
 
 export default class SolFrenFollow {
   private driver: neo4j.Driver;
@@ -13,11 +13,7 @@ export default class SolFrenFollow {
     await this.driver.close();
   }
 
-  public async follow(walletAddress: string, followAddress: string, type: string) {
-    if (type !== 'Wallet' && type !== 'NFT' && type !== 'Collection') {
-      throw new Error(`follow type not supported`);
-    }
-
+  public async follow(walletAddress: string, followAddress: string, type: FollowType) {
     const session = this.driver.session({ database: 'neo4j' });
     try {
       const writeQuery = `MERGE (m1:Wallet { address: $walletAddress })
@@ -31,11 +27,7 @@ export default class SolFrenFollow {
     }
   }
 
-  public async unfollow(walletAddress: string, followAddress: string, type: string) {
-    if (type !== 'Wallet' && type !== 'NFT' && type !== 'Collection') {
-      throw new Error(`follow type not supported`);
-    }
-
+  public async unfollow(walletAddress: string, followAddress: string, type: FollowType) {
     const session = this.driver.session({ database: 'neo4j' });
     try {
       const writeQuery = `MATCH (m1:Wallet { address: $walletAddress })
@@ -50,11 +42,7 @@ export default class SolFrenFollow {
     }
   }
 
-  public async listFollowers(walletAddress: string, type: string): Promise<Follow[]> {
-    if (type !== 'Wallet' && type !== 'NFT' && type !== 'Collection') {
-      throw new Error(`follow type not supported`);
-    }
-
+  public async listFollowers(walletAddress: string, type: FollowType): Promise<Follow[]> {
     const session = this.driver.session({ database: 'neo4j' });
     try {
       const follows: Follow[] = [];
@@ -72,11 +60,7 @@ export default class SolFrenFollow {
     }
   }
 
-  public async countFollowers(walletAddress: string, type: string): Promise<number> {
-    if (type !== 'Wallet' && type !== 'NFT' && type !== 'Collection') {
-      throw new Error(`follow type not supported`);
-    }
-
+  public async countFollowers(walletAddress: string, type: FollowType): Promise<number> {
     const session = this.driver.session({ database: 'neo4j' });
     try {
       const writeQuery = `MATCH (:${type} { address: $walletAddress })<-[:FOLLOWS]-(w) RETURN count(w)`;
@@ -90,11 +74,7 @@ export default class SolFrenFollow {
     }
   }
 
-  public async listFollowings(walletAddress: string, type: string): Promise<Follow[]> {
-    if (type !== 'Wallet') {
-      throw new Error(`follow type not supported`);
-    }
-
+  public async listFollowings(walletAddress: string, type: FollowType): Promise<Follow[]> {
     const session = this.driver.session({ database: 'neo4j' });
     try {
       const follows: Follow[] = [];
@@ -112,11 +92,7 @@ export default class SolFrenFollow {
     }
   }
 
-  public async countFollowings(walletAddress: string, type: string): Promise<number> {
-    if (type !== 'Wallet') {
-      throw new Error(`follow type not supported`);
-    }
-
+  public async countFollowings(walletAddress: string, type: FollowType): Promise<number> {
     const session = this.driver.session({ database: 'neo4j' });
     try {
       const writeQuery = `MATCH (:Wallet { address: $walletAddress })-[:FOLLOWS]->(w:${type}) RETURN count(w)`;

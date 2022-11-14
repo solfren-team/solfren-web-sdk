@@ -8,6 +8,7 @@ import { SolNFTTransSale, CollectionInfo } from "../../protocols/solfren-nft/typ
 import SimpleHash from '../../protocols/simpleHash';
 import { Nft } from '../../protocols/simpleHash/types';
 import SolFrenFollow from '../../protocols/solfren-follow';
+import { FollowType } from '../../protocols/solfren-follow/types';
 
 
 export default class NFT {
@@ -169,22 +170,22 @@ export default class NFT {
   }
 
   public async likeCollection(walletAddress: string, collectionId: string) {
-    await this.solFrenFollow.follow(walletAddress, collectionId, 'Collection');
+    await this.solFrenFollow.follow(walletAddress, collectionId, FollowType.Collection);
     await this.solFrenFollow.close();
   }
 
   public async unlikeCollection(walletAddress: string, collectionId: string) {
-    await this.solFrenFollow.unfollow(walletAddress, collectionId, 'Collection');
+    await this.solFrenFollow.unfollow(walletAddress, collectionId, FollowType.Collection);
     await this.solFrenFollow.close();
   }
 
   public async likeNFT(walletAddress: string, mintAddress: string) {
-    await this.solFrenFollow.follow(walletAddress, mintAddress, 'NFT');
+    await this.solFrenFollow.follow(walletAddress, mintAddress, FollowType.NFT);
     await this.solFrenFollow.close();
   }
 
   public async unlikeNFT(walletAddress: string, mintAddress: string) {
-    await this.solFrenFollow.unfollow(walletAddress, mintAddress, 'NFT');
+    await this.solFrenFollow.unfollow(walletAddress, mintAddress, FollowType.NFT);
     await this.solFrenFollow.close();
   }
 
