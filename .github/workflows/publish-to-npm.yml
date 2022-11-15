@@ -1,0 +1,30 @@
+name: publish-to-npm
+on:
+  push:
+    branches:
+      - release
+jobs:
+  release:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: node
+          package-name: "@solfrenxyz/solfren-web-sdk"
+      # The logic below handles the npm publication:
+      - name: Fetch Repository
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+          registry-url: "https://registry.npmjs.org"
+      - name: Install Packages
+        run: yarn install
+      - name: Build Packages
+        run: yarn build
+      - name: Publish New Version
+        run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
