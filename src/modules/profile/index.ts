@@ -7,6 +7,7 @@ import TwitterAPI from '../../protocols/twitter';
 import WonkaAPI from '../../protocols/wonka';
 import { PublicKey } from '@solana/web3.js';
 import SolFrenFollow from '../../protocols/solfren-follow';
+import { FollowType } from '../../protocols/solfren-follow/types';
 
 export default class Profile {
   private solFrenFollow: SolFrenFollow;
@@ -81,8 +82,8 @@ export default class Profile {
           name: wallet.selectedAvatarNFT?.name,
           imageUrl: wallet.selectedAvatarNFT?.image_url,
         },
-        followerCount: await this.solFrenFollow.countFollowers(walletAddress, 'Wallet'),
-        followingCount: await this.solFrenFollow.countFollowings(walletAddress, 'Wallet'),
+        followerCount: await this.solFrenFollow.countFollowers(walletAddress, FollowType.Wallet),
+        followingCount: await this.solFrenFollow.countFollowings(walletAddress, FollowType.Wallet),
         github: undefined, // deprecated
       },
       statistics: {
@@ -142,8 +143,8 @@ export default class Profile {
         solanaDomain: v.solanaDomain,
         achievements: v.achievements,
         selectedAvatarNFT: selectedAvatarNFT,
-        followerCount: await this.solFrenFollow.countFollowers(k, 'Wallet'),
-        followingCount: await this.solFrenFollow.countFollowings(k, 'Wallet'),
+        followerCount: await this.solFrenFollow.countFollowers(k, FollowType.Wallet),
+        followingCount: await this.solFrenFollow.countFollowings(k, FollowType.Wallet),
         github: undefined, // deprecated
       })
     }
@@ -178,24 +179,24 @@ export default class Profile {
   }
 
   public async follow(walletAddress: string, followAddress: string) {
-    await this.solFrenFollow.follow(walletAddress, followAddress, 'Wallet');
+    await this.solFrenFollow.follow(walletAddress, followAddress, FollowType.Wallet);
     await this.solFrenFollow.close();
   }
 
   public async unfollow(walletAddress: string, followAddress: string) {
-    await this.solFrenFollow.unfollow(walletAddress, followAddress, 'Wallet');
+    await this.solFrenFollow.unfollow(walletAddress, followAddress, FollowType.Wallet);
     await this.solFrenFollow.close();
   }
 
   public async listFollowers(walletAddress: string, size: number = 30, cursor: string = ''): Promise<ListFollowersResponse> {
-    const followers = await this.solFrenFollow.listFollowers(walletAddress, 'Wallet');
+    const followers = await this.solFrenFollow.listFollowers(walletAddress, FollowType.Wallet);
     const res: ListFollowersResponse = { followers };
 
     return res;
   }
 
   public async listFollowings(walletAddress: string, size: number = 30, cursor: string = ''): Promise<ListFollowingsResponse> {
-    const followings = await this.solFrenFollow.listFollowings(walletAddress, 'Wallet');
+    const followings = await this.solFrenFollow.listFollowings(walletAddress, FollowType.Wallet);
     const res: ListFollowingsResponse = { followings: followings };
 
     return res;
