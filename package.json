@@ -1,6 +1,6 @@
 {
   "name": "@solfrenxyz/solfren-web-sdk",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "SolFren web sdk",
   "main": "lib/index.js",
   "publishConfig": {

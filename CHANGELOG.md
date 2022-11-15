@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.6.0](https://github.com/solfren-team/solfren-web-sdk/compare/v0.5.0...v0.6.0) (2022-11-15)
+
+
+### Features
+
+* **profile:** get follower and following count ([aa2b627](https://github.com/solfren-team/solfren-web-sdk/commit/aa2b627577989cb4876fc747c138c0b9a767213a))
+* **protocol:** implement count followers and followings methods ([d81d184](https://github.com/solfren-team/solfren-web-sdk/commit/d81d184b2c8db452864745e2ef9028508557227f))
+* **protocol:** introduce solfren-follow ([1107458](https://github.com/solfren-team/solfren-web-sdk/commit/1107458c5175105ba9a63ef69cb37c134204e71c))
+
 ## [0.5.0](https://github.com/solfren-team/solfren-web-sdk/compare/v0.4.0...v0.5.0) (2022-11-10)
 
 
