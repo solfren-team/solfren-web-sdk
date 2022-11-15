@@ -4,14 +4,12 @@ import { ListFollowersResponse, ListFollowingsResponse, ProfileItem, Twitter, Wa
 import SolFrenWallet from '../../protocols/solfren-wallet';
 import { WalletInfo } from '../../protocols/solfren-wallet/types';
 import TwitterAPI from '../../protocols/twitter';
-import WonkaAPI from '../../protocols/wonka';
 import { PublicKey } from '@solana/web3.js';
 import SolFrenFollow from '../../protocols/solfren-follow';
 
 export default class Profile {
   private solFrenFollow: SolFrenFollow;
   private solFrenWallet: SolFrenWallet;
-  private wonkaAPI: WonkaAPI;
   private twitterAPI: TwitterAPI;
 
   public constructor(config: Config) {
@@ -19,12 +17,10 @@ export default class Profile {
     assert(config?.solFrenAPI?.follow.endpoint);
     assert(config?.solFrenAPI?.follow.username);
     assert(config?.solFrenAPI?.follow.password);
-    assert(config?.wonkaAPI?.endpoint);
     assert(config?.twitter?.apiKey);
 
     this.solFrenFollow = new SolFrenFollow(config.solFrenAPI.follow.endpoint, config.solFrenAPI.follow.username, config.solFrenAPI.follow.password);
     this.solFrenWallet = new SolFrenWallet(config.solFrenAPI.apiKey);
-    this.wonkaAPI = new WonkaAPI(config.wonkaAPI.endpoint);
     this.twitterAPI = new TwitterAPI(config.twitter.apiKey);
   }
 
@@ -32,9 +28,11 @@ export default class Profile {
     // check walletAddress is a valid address.
     const walletAddressKey = new PublicKey(walletAddress);
     let wallet = await this.solFrenWallet.getWallet(walletAddress);
-    if (!wallet.twitterHandle || !wallet.solanaDomain) {
-      wallet = await this.syncWithBonfida(wallet);
-    }
+
+    // TODO WonkaAPI deprecated. find replacement.
+    // if (!wallet.twitterHandle || !wallet.solanaDomain) {
+    //   wallet = await this.syncWithBonfida(wallet);
+    // }
 
     let twitter: Twitter | undefined;
     if (wallet.twitterInfo) {
@@ -151,31 +149,31 @@ export default class Profile {
     return wallets;
   }
 
-  private async syncWithBonfida(walletInfo: WalletInfo): Promise<WalletInfo> {
-    const resp = await this.wonkaAPI.fetchSolDomainMetadata(walletInfo.walletAddress);
-    if (!resp) {
-      return walletInfo;
-    }
+  // private async syncWithBonfida(walletInfo: WalletInfo): Promise<WalletInfo> {
+  //   const resp = await this.wonkaAPI.fetchSolDomainMetadata(walletInfo.walletAddress);
+  //   if (!resp) {
+  //     return walletInfo;
+  //   }
 
-    walletInfo.twitterHandle = resp.twitter;
-    walletInfo.solanaDomain = resp.solName;
-    if (resp.twitter) {
-      walletInfo.twitterInfo = await this.twitterAPI.getTwitterInfo(resp.twitter);
-    }
+  //   walletInfo.twitterHandle = resp.twitter;
+  //   walletInfo.solanaDomain = resp.solName;
+  //   if (resp.twitter) {
+  //     walletInfo.twitterInfo = await this.twitterAPI.getTwitterInfo(resp.twitter);
+  //   }
 
-    try {
-      await this.solFrenWallet.upsertWallet({
-        walletAddress: walletInfo.walletAddress,
-        twitterHandle: walletInfo.twitterHandle,
-        twitterInfo: walletInfo.twitterInfo,
-        solanaDomain: walletInfo.solanaDomain,
-      } as WalletInfo);
-    } catch (err) {
-      console.error('failed to upsertWallet', err);
-    }
+  //   try {
+  //     await this.solFrenWallet.upsertWallet({
+  //       walletAddress: walletInfo.walletAddress,
+  //       twitterHandle: walletInfo.twitterHandle,
+  //       twitterInfo: walletInfo.twitterInfo,
+  //       solanaDomain: walletInfo.solanaDomain,
+  //     } as WalletInfo);
+  //   } catch (err) {
+  //     console.error('failed to upsertWallet', err);
+  //   }
 
-    return walletInfo;
-  }
+  //   return walletInfo;
+  // }
 
   public async follow(walletAddress: string, followAddress: string) {
     await this.solFrenFollow.follow(walletAddress, followAddress, 'Wallet');
