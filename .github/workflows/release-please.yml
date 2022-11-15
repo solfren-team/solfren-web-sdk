@@ -1,8 +1,8 @@
+name: release-please
 on:
   push:
     branches:
       - main
-name: release-please
 jobs:
   release-please:
     runs-on: ubuntu-22.04
@@ -11,20 +11,26 @@ jobs:
         id: release
         with:
           release-type: node
-          package-name: '@solfrenxyz/solfren-web-sdk'
+          package-name: "@solfrenxyz/solfren-web-sdk"
       # The logic below handles the npm publication:
-      - uses: actions/checkout@v2
+      - name: Fetch Repository
+        uses: actions/checkout@v3
         # these if statements ensure that a publication only occurs when
         # a new release is created:
         if: ${{ steps.release.outputs.release_created }}
-      - uses: actions/setup-node@v1
+      - name: Setup Node
+        uses: actions/setup-node@v3
         with:
           node-version: 16
-          registry-url: 'https://registry.npmjs.org'
+          registry-url: "https://registry.npmjs.org"
         if: ${{ steps.release.outputs.release_created }}
-      - run: yarn build
+      - name: Install Packages
+        run: yarn install
+      - name: Build Packages
+        run: yarn build
         if: ${{ steps.release.outputs.release_created }}
-      - run: yarn publish
+      - name: Publish New Version
+        run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         if: ${{ steps.release.outputs.release_created }}
