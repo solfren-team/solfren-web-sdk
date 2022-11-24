@@ -2,8 +2,6 @@ import assert from 'assert';
 import { Config } from '../../types';
 import { ListFollowersResponse, ListFollowingsResponse, ProfileItem, Twitter, Wallet } from './types';
 import SolFrenWallet from '../../protocols/solfren-wallet';
-import { WalletInfo } from '../../protocols/solfren-wallet/types';
-import TwitterAPI from '../../protocols/twitter';
 import { PublicKey } from '@solana/web3.js';
 import SolFrenFollow from '../../protocols/solfren-follow';
 import { FollowType } from '../../protocols/solfren-follow/types';
@@ -11,7 +9,6 @@ import { FollowType } from '../../protocols/solfren-follow/types';
 export default class Profile {
   private solFrenFollow: SolFrenFollow;
   private solFrenWallet: SolFrenWallet;
-  private twitterAPI: TwitterAPI;
 
   public constructor(config: Config) {
     assert(config?.solFrenAPI?.apiKey);
@@ -22,12 +19,11 @@ export default class Profile {
 
     this.solFrenFollow = new SolFrenFollow(config.solFrenAPI.follow.endpoint, config.solFrenAPI.follow.username, config.solFrenAPI.follow.password);
     this.solFrenWallet = new SolFrenWallet(config.solFrenAPI.apiKey);
-    this.twitterAPI = new TwitterAPI(config.twitter.apiKey);
   }
 
   public async get(walletAddress: string): Promise<ProfileItem> {
     // check walletAddress is a valid address.
-    const walletAddressKey = new PublicKey(walletAddress);
+    new PublicKey(walletAddress);
     let wallet = await this.solFrenWallet.getWallet(walletAddress);
 
     // TODO WonkaAPI deprecated. find replacement.
@@ -187,16 +183,30 @@ export default class Profile {
   }
 
   public async listFollowers(walletAddress: string, size: number = 30, cursor: string = ''): Promise<ListFollowersResponse> {
-    const followers = await this.solFrenFollow.listFollowers(walletAddress, FollowType.Wallet);
-    const res: ListFollowersResponse = { followers };
+    const followers = await this.solFrenFollow.listFollowers(walletAddress, FollowType.Wallet, size, cursor);
 
-    return res;
+    let nextCursor;
+    if (followers.length == size) {
+      nextCursor = followers[followers.length - 1];
+    }
+
+    return {
+      followers,
+      cursor: nextCursor,
+    };
   }
 
   public async listFollowings(walletAddress: string, size: number = 30, cursor: string = ''): Promise<ListFollowingsResponse> {
-    const followings = await this.solFrenFollow.listFollowings(walletAddress, FollowType.Wallet);
-    const res: ListFollowingsResponse = { followings: followings };
+    const followings = await this.solFrenFollow.listFollowings(walletAddress, FollowType.Wallet, size, cursor);
 
-    return res;
+    let nextCursor;
+    if (followings.length == size) {
+      nextCursor = followings[followings.length - 1];
+    }
+
+    return {
+      followings: followings,
+      cursor: nextCursor,
+    };
   }
 }

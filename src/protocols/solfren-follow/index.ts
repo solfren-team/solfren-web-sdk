@@ -42,11 +42,16 @@ export default class SolFrenFollow {
     }
   }
 
-  public async listFollowers(walletAddress: string, type: FollowType): Promise<Follow[]> {
+  public async listFollowers(walletAddress: string, type: FollowType, limit: number, cursor?: string): Promise<Follow[]> {
     const session = this.driver.session({ database: 'neo4j' });
     try {
+      let cursorQuery = '';
+      if (cursor) {
+        cursorQuery = `WHERE w.address > '${cursor}'`;
+      }
+
       const follows: Follow[] = [];
-      const writeQuery = `MATCH (:${type} { address: $walletAddress })<-[:FOLLOWS]-(w) RETURN w`;
+      const writeQuery = `MATCH (:${type} { address: $walletAddress })<-[:FOLLOWS]-(w) ${cursorQuery} RETURN w ORDER BY w.address LIMIT ${limit}`;
       const writeResult = await session.writeTransaction(tx => tx.run(writeQuery, { walletAddress }));
       writeResult.records.forEach(record => {
         follows.push(record.get('w'));
@@ -74,11 +79,16 @@ export default class SolFrenFollow {
     }
   }
 
-  public async listFollowings(walletAddress: string, type: FollowType): Promise<Follow[]> {
+  public async listFollowings(walletAddress: string, type: FollowType, limit: number, cursor?: string): Promise<Follow[]> {
     const session = this.driver.session({ database: 'neo4j' });
     try {
+      let cursorQuery = '';
+      if (cursor) {
+        cursorQuery = `WHERE w.address > '${cursor}'`;
+      }
+
       const follows: Follow[] = [];
-      const writeQuery = `MATCH (:Wallet { address: $walletAddress })-[:FOLLOWS]->(w:${type}) RETURN w`;
+      const writeQuery = `MATCH (:Wallet { address: $walletAddress })-[:FOLLOWS]->(w:${type}) ${cursorQuery} RETURN w ORDER BY w.address LIMIT ${limit}`;
       const writeResult = await session.writeTransaction(tx => tx.run(writeQuery, { walletAddress }));
       writeResult.records.forEach(record => {
         follows.push(record.get('w'));
